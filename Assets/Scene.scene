@@ -10,6 +10,7 @@
     - !<own> 87db8f73-86e2-48f1-854b-58417bb8000f
     - !<own> 6c649ae7-04e8-4abb-88b8-d496dca55b76
     - !<own> 647e243d-e958-4422-a31d-4a70ab405371
+    - !<own> 518c125d-273d-49f4-b5dd-e4ee0b959387
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -195,6 +196,21 @@
     - !<own> 276368e3-f687-4cc6-947d-24de3a78c9af
   Components:
     []
+- !<SceneObject/014b74e0-f914-4450-8196-e59ef4fcb75f>
+  PrefabRemaps:
+    []
+  Name: PoolCard_8
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> c7a03f55-d89d-411b-a61f-413478bad9fb
 - !<Text/02e00a07-4a57-4eb2-bafc-f9333b3174a8>
   PrefabRemaps:
     []
@@ -324,6 +340,45 @@
     []
   Components:
     []
+- !<Text3D/0696adf8-da11-4ace-b4f2-d419ef786cec>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 00888c69-7c1a-4cb0-98b1-1197c50fc801
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/075c6915-13a7-479f-9ed8-17c41238c96b>
   PrefabRemaps:
     []
@@ -424,6 +479,45 @@
   ScriptTypes:
     "":
       {}
+- !<Text3D/086a75b9-d916-4a3a-a8b9-c4b8815104a3>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> e365c8ac-701d-406f-bd5b-a070e79e110e
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/08e3cc22-f2e1-49fb-9ddc-145fe6547ce3>
   PrefabRemaps:
     []
@@ -439,6 +533,21 @@
     []
   Components:
     []
+- !<SceneObject/08fc7dc0-8618-47f9-9340-4d6cb717249f>
+  PrefabRemaps:
+    []
+  Name: PoolCard_10
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 2a7af549-7817-41b8-acbd-98f4e3e371c1
 - !<SceneObject/0911db7e-7b90-4790-bab3-9ac99e936696>
   PrefabRemaps:
     []
@@ -499,45 +608,21 @@
     []
   Components:
     []
-- !<Text3D/0e04e05b-a34b-4393-a79e-60c3cc30acf9>
+- !<SceneObject/0dbc7ee0-c6a2-4f69-b5f6-8b61b47420b5>
   PrefabRemaps:
     []
-  Name: Text3D
-  Enabled: true
-  RenderOrder: 0
-  StretchMode: Stretch
-  VerticalAlignment: Center
-  HorizontalAlignment: Center
-  MeshShadowMode: None
-  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
-  ShadowDensity: 1.000000
-  Materials:
-    - !<reference> 0b848b90-723c-4579-b091-a9ea883fadaa
-  Text: Attend important meeting
-  Editable: false
-  ShowEditingPreview: true
-  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
-  EnableRichText: false
-  SizeToFit: false
-  FontSize: 22.000000
-  ExtrusionDepth: 0.400000
-  ExtrudeDirection: Both
-  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
-  PreferredStyle: Regular
-  LayoutRect:
-    left: -7.500000
-    bottom: -2.250000
-    right: 7.500000
-    top: 2.250000
-  DebugRenderLayoutRect: false
-  OverflowVertical: Overflow
-  OverflowHorizontal: Overflow
-  AdvancedLayout: !<TextAdvancedLayout>
-    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
-    LetterSpacing: 0.000000
-    LineSpacing: 1.000000
-    CapitalizationOverride: None
-  EnableBatching: false
+  Name: PoolCard_1
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> cd70eaae-d809-4e79-b410-83725cc972d1
 - !<SceneObject/0e778a10-bd57-4a2a-b20a-b6f4326e8058>
   PrefabRemaps:
     []
@@ -718,6 +803,45 @@
   MaxDistance: 100.000000
   EnableDirectivityEffect: false
   EnablePositionEffect: false
+- !<Text3D/145e12eb-c560-4c4b-9d36-16445ebe2457>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 4d61ef1a-d2d6-4b50-88ec-ae5ef20883f1
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<ScriptComponent/15cb1acd-fadf-4202-a1d3-90c84a1b7706>
   PrefabRemaps:
     []
@@ -1101,6 +1225,45 @@
     []
   Components:
     []
+- !<Text3D/258eceaf-36f7-472e-94f1-9deaddfa6250>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 41694d96-271c-4e90-966d-899a5104fc07
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/264571d0-f879-411b-8deb-ff6d9921317f>
   PrefabRemaps:
     []
@@ -1218,6 +1381,45 @@
     ring-3_end_end_end: !<reference> b93dfa60-41bd-4999-ac0f-4b2f1df2bdaf
     thumb-3_end_end_end_end: !<reference> 08e3cc22-f2e1-49fb-9ddc-145fe6547ce3
     pinky-3_end_end: !<reference> d08269e3-acd4-4156-b5b9-477ca259611d
+- !<Text3D/2a7af549-7817-41b8-acbd-98f4e3e371c1>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> f22eaf81-2288-44b9-a15d-a89945a66a5f
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<Text3D/2b25388d-70df-430a-9743-2e0d26bb287d>
   PrefabRemaps:
     []
@@ -1508,6 +1710,21 @@
   ScriptTypes:
     "":
       {}
+- !<SceneObject/3506a1f6-8e51-4043-aa9a-ccd1eec3a203>
+  PrefabRemaps:
+    []
+  Name: PoolCard_11
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> fa59e25e-a70f-4d33-a7b2-39dafc30a666
 - !<RenderMeshVisual/35501b69-b651-41e6-9b64-72a252df8105>
   PrefabRemaps:
     []
@@ -1589,6 +1806,23 @@
     - !<own> 264571d0-f879-411b-8deb-ff6d9921317f
   Components:
     []
+- !<ScriptComponent/3b19fae4-1e39-4bab-9e51-f5f3cfd22218>
+  PrefabRemaps:
+    []
+  Name: RingLayoutController
+  Enabled: true
+  ScriptAsset: !<reference> e7979ff8-277e-450c-a389-afd78cc80c13
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      flyDuration: 0.700000
+      stagger: 0.120000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/3b4f5057-b516-4d3b-9c8d-14c81af2f505>
   PrefabRemaps:
     []
@@ -1694,6 +1928,21 @@
     - !<own> 8fe2a532-9bf3-4cde-b598-04ce5470718d
   Components:
     []
+- !<SceneObject/471cc893-435c-4554-90db-461e49544c51>
+  PrefabRemaps:
+    []
+  Name: PoolCard_4
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 90c2dc7a-e12a-406a-9915-bdd831fb6d29
 - !<SceneObject/4759bcf5-2428-4324-840e-584922fec125>
   PrefabRemaps:
     []
@@ -1906,6 +2155,21 @@
     []
   Components:
     - !<own> d2119535-4cae-41ee-b8ea-89dc78b0610d
+- !<SceneObject/518c125d-273d-49f4-b5dd-e4ee0b959387>
+  PrefabRemaps:
+    []
+  Name: PersistenceTests
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> bd18bed6-6187-46b3-abfa-5a816a30ff54
 - !<SceneObject/51e7e3ce-f589-40da-8386-c8977b777a7e>
   PrefabRemaps:
     []
@@ -1983,21 +2247,6 @@
     - !<own> bf2095b6-c6f8-48c8-b840-e0a6cec0dc99
   Components:
     []
-- !<SceneObject/5d93280d-5654-42a4-bf35-ea1d299f9506>
-  PrefabRemaps:
-    []
-  Name: Card_Residency
-  Enabled: true
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: -20.000000, z: 14.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> 79ade59e-add5-455f-9ce8-e1d71f48a1c8
 - !<SceneObject/5e6b876d-5d8e-4d5e-a000-e1ac2bb330da>
   PrefabRemaps:
     []
@@ -2111,13 +2360,10 @@
     - !<own> 18c9ac22-8cbd-450a-9cb0-6966fe3b17a0
     - !<own> f3de9cdc-e8ce-4328-8475-317ed49fafd9
     - !<own> c192c27b-5df8-4462-b363-bd2a9b23b126
-    - !<own> 9905e7f9-172f-4921-84e7-9359ee314abf
-    - !<own> afeb61f9-39cf-4575-aa35-968d4b0aa9e0
-    - !<own> d02ea4d8-d048-4867-9b6a-5feb6fd0dffd
-    - !<own> 5d93280d-5654-42a4-bf35-ea1d299f9506
     - !<own> d6b4c702-28d5-448e-b34e-48bac32b31fe
+    - !<own> f11a307b-d7b3-4ea7-981f-5c07d79e8d4d
   Components:
-    []
+    - !<own> 3b19fae4-1e39-4bab-9e51-f5f3cfd22218
 - !<SceneObject/647e243d-e958-4422-a31d-4a70ab405371>
   PrefabRemaps:
     []
@@ -2251,6 +2497,21 @@
     - !<own> 80574bd1-697b-4bb5-b9ce-13b340146d82
   Components:
     - !<own> ccf4d3bc-d3c2-4580-b9c5-62f164ef7eef
+- !<SceneObject/668d38e2-1505-42f1-b0a7-aaec7107c5ab>
+  PrefabRemaps:
+    []
+  Name: PoolCard_6
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 9a613a63-4c05-4fe6-9ec9-226ec1525f29
 - !<Text/67310f27-daac-4617-85c5-ef17d224660c>
   PrefabRemaps:
     []
@@ -2749,45 +3010,6 @@
     []
   Components:
     - !<own> c8e031d3-a8a1-468a-a419-427f8556de4c
-- !<Text3D/79ade59e-add5-455f-9ce8-e1d71f48a1c8>
-  PrefabRemaps:
-    []
-  Name: Text3D
-  Enabled: true
-  RenderOrder: 0
-  StretchMode: Stretch
-  VerticalAlignment: Center
-  HorizontalAlignment: Center
-  MeshShadowMode: None
-  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
-  ShadowDensity: 1.000000
-  Materials:
-    - !<reference> 7b8f6467-ba4f-4e63-97b7-346e459e2dea
-  Text: Apply for residency program
-  Editable: false
-  ShowEditingPreview: true
-  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
-  EnableRichText: false
-  SizeToFit: false
-  FontSize: 22.000000
-  ExtrusionDepth: 0.400000
-  ExtrudeDirection: Both
-  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
-  PreferredStyle: Regular
-  LayoutRect:
-    left: -7.500000
-    bottom: -2.250000
-    right: 7.500000
-    top: 2.250000
-  DebugRenderLayoutRect: false
-  OverflowVertical: Overflow
-  OverflowHorizontal: Overflow
-  AdvancedLayout: !<TextAdvancedLayout>
-    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
-    LetterSpacing: 0.000000
-    LineSpacing: 1.000000
-    CapitalizationOverride: None
-  EnableBatching: false
 - !<SceneObject/7aa85bd8-d423-42cd-b190-473711e94929>
   PrefabRemaps:
     []
@@ -3323,8 +3545,8 @@
     {}
   ScriptInputs:
     "":
-      openAIToken: 4200914d-fba0-48a1-a4a0-e67c296b56fc
-      googleToken: 86785040-ccc5-41d4-adce-2ecdafc3df98
+      openAIToken: ""
+      googleToken: ""
       snapToken: "[INSERT SNAP TOKEN]"
       enableLogging: false
       enableLoggingLifecycle: false
@@ -3399,45 +3621,6 @@
   BlendNormals: false
   BlendShapes:
     {}
-- !<Text3D/8a1535a7-1636-4613-b8c1-8e06dabb0211>
-  PrefabRemaps:
-    []
-  Name: Text3D
-  Enabled: true
-  RenderOrder: 0
-  StretchMode: Stretch
-  VerticalAlignment: Center
-  HorizontalAlignment: Center
-  MeshShadowMode: None
-  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
-  ShadowDensity: 1.000000
-  Materials:
-    - !<reference> b79ee413-8623-408b-a18e-b12e10cce049
-  Text: Get a haircut
-  Editable: false
-  ShowEditingPreview: true
-  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
-  EnableRichText: false
-  SizeToFit: false
-  FontSize: 22.000000
-  ExtrusionDepth: 0.400000
-  ExtrudeDirection: Both
-  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
-  PreferredStyle: Regular
-  LayoutRect:
-    left: -7.500000
-    bottom: -2.250000
-    right: 7.500000
-    top: 2.250000
-  DebugRenderLayoutRect: false
-  OverflowVertical: Overflow
-  OverflowHorizontal: Overflow
-  AdvancedLayout: !<TextAdvancedLayout>
-    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
-    LetterSpacing: 0.000000
-    LineSpacing: 1.000000
-    CapitalizationOverride: None
-  EnableBatching: false
 - !<SceneObject/8b877074-7eee-4be1-b669-714f8d5a1da3>
   PrefabRemaps:
     []
@@ -3552,6 +3735,45 @@
     - !<own> 8cb3dd13-6ebf-41e6-9a23-94a69dd96f87
   Components:
     []
+- !<Text3D/90c2dc7a-e12a-406a-9915-bdd831fb6d29>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 6558d9c6-23ce-4408-96a3-df1ac46da142
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/9468c53c-f76f-49b7-8a49-b5ec6af1c5a3>
   PrefabRemaps:
     []
@@ -3568,6 +3790,21 @@
     - !<own> e9454e66-5d09-4a8a-bcd7-dea762326a48
   Components:
     []
+- !<SceneObject/9668beed-a9f5-412a-91a2-3d3376f62ef6>
+  PrefabRemaps:
+    []
+  Name: PoolCard_7
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 086a75b9-d916-4a3a-a8b9-c4b8815104a3
 - !<SceneObject/988c408a-99dc-47e6-b7c4-efbf4bf8dc3c>
   PrefabRemaps:
     []
@@ -3583,21 +3820,6 @@
     - !<own> a4de4ce7-f468-4966-8a06-e29eea60c023
   Components:
     []
-- !<SceneObject/9905e7f9-172f-4921-84e7-9359ee314abf>
-  PrefabRemaps:
-    []
-  Name: TestCard
-  Enabled: true
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 14.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> 0e04e05b-a34b-4393-a79e-60c3cc30acf9
 - !<ScriptComponent/997569fd-396a-41c5-bf51-1cccc77d3cd2>
   PrefabRemaps:
     []
@@ -3614,6 +3836,45 @@
   ScriptTypes:
     "":
       {}
+- !<Text3D/9a613a63-4c05-4fe6-9ec9-226ec1525f29>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 586c93d1-298d-453a-bdc3-3406517c08b5
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/9c3a7929-faa9-4369-a85c-c75a6ab4eee7>
   PrefabRemaps:
     []
@@ -3675,45 +3936,6 @@
     - !<own> 46ea93d6-d161-4453-9064-6ac11e1d6523
   Components:
     []
-- !<Text3D/9f3ebd99-e519-4c86-ac20-67128c541fe8>
-  PrefabRemaps:
-    []
-  Name: Text3D
-  Enabled: true
-  RenderOrder: 0
-  StretchMode: Stretch
-  VerticalAlignment: Center
-  HorizontalAlignment: Center
-  MeshShadowMode: None
-  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
-  ShadowDensity: 1.000000
-  Materials:
-    - !<reference> ca427544-39e9-4851-a2ea-01da8c7c0110
-  Text: Submit hackathon project
-  Editable: false
-  ShowEditingPreview: true
-  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
-  EnableRichText: false
-  SizeToFit: false
-  FontSize: 20.000000
-  ExtrusionDepth: 0.400000
-  ExtrudeDirection: Both
-  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
-  PreferredStyle: Regular
-  LayoutRect:
-    left: -7.500000
-    bottom: -2.250000
-    right: 7.500000
-    top: 2.250000
-  DebugRenderLayoutRect: false
-  OverflowVertical: Overflow
-  OverflowHorizontal: Overflow
-  AdvancedLayout: !<TextAdvancedLayout>
-    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
-    LetterSpacing: 0.000000
-    LineSpacing: 1.000000
-    CapitalizationOverride: None
-  EnableBatching: false
 - !<Text/a086530f-140b-4eba-82a8-5f1a5c6518f9>
   PrefabRemaps:
     []
@@ -4177,21 +4399,21 @@
   ScriptTypes:
     "":
       {}
-- !<SceneObject/afeb61f9-39cf-4575-aa35-968d4b0aa9e0>
+- !<SceneObject/b0f9fff8-a8df-4d37-a0bc-3ce7e77def0b>
   PrefabRemaps:
     []
-  Name: Card_Haircut
-  Enabled: true
+  Name: PoolCard_2
+  Enabled: false
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 9.000000, z: 14.000000}
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
   Children:
     []
   Components:
-    - !<own> 8a1535a7-1636-4613-b8c1-8e06dabb0211
+    - !<own> 0696adf8-da11-4ace-b4f2-d419ef786cec
 - !<SceneObject/b22d97e6-4c06-4135-af29-d26adb2b9d86>
   PrefabRemaps:
     []
@@ -4366,6 +4588,21 @@
     - !<own> c59e3bc0-0034-4fa0-8703-bb4e2d1e03c4
   Components:
     []
+- !<SceneObject/b6f1b843-4d71-4c01-9182-45dd0c80997c>
+  PrefabRemaps:
+    []
+  Name: PoolCard_5
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> d263a38a-79ff-4fb2-a20b-1ab1f6daabf2
 - !<SceneObject/b786dabc-29e4-4cfa-8a84-f39604ffcbdd>
   PrefabRemaps:
     []
@@ -4381,6 +4618,21 @@
     []
   Components:
     []
+- !<SceneObject/b796d9e5-77ea-4bdb-a3d4-56e29b277ace>
+  PrefabRemaps:
+    []
+  Name: PoolCard_0
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 258eceaf-36f7-472e-94f1-9deaddfa6250
 - !<SceneObject/b859e31c-4c76-46bd-bd6a-042228e52728>
   PrefabRemaps:
     []
@@ -4484,6 +4736,21 @@
     - !<own> 11ac73c9-b802-4eb6-abf5-f73054ca7e20
   Components:
     []
+- !<SceneObject/baa1305c-ceee-49fe-91af-da66ee904712>
+  PrefabRemaps:
+    []
+  Name: PoolCard_9
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 145e12eb-c560-4c4b-9d36-16445ebe2457
 - !<SceneObject/bb75b5ea-8baf-4d8d-bcf8-49bd79873881>
   PrefabRemaps:
     []
@@ -4544,6 +4811,22 @@
     - !<own> fe93d992-1114-4f1f-8bef-0a0bbd75747d
   Components:
     []
+- !<ScriptComponent/bd18bed6-6187-46b3-abfa-5a816a30ff54>
+  PrefabRemaps:
+    []
+  Name: PersistenceTests
+  Enabled: true
+  ScriptAsset: !<reference> af468027-16f9-4faf-84b0-99ac8849e19c
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/bea9d061-237b-4c9a-9435-e9af072a6b7e>
   PrefabRemaps:
     []
@@ -4689,6 +4972,84 @@
     - !<own> c2642e04-1b8a-403b-9f76-31f304d6ec42
   Components:
     []
+- !<Text3D/c7a03f55-d89d-411b-a61f-413478bad9fb>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 0facf39c-7926-4ecd-b569-0ce7381a859c
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
+- !<Text3D/c89949b6-3290-4e1d-b6a6-1bfda65d118f>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 9bfebd86-1bfa-455c-a40f-e946d0e747f7
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<ScriptComponent/c8e031d3-a8a1-468a-a419-427f8556de4c>
   PrefabRemaps:
     []
@@ -4747,6 +5108,21 @@
     []
   Components:
     - !<own> 67310f27-daac-4617-85c5-ef17d224660c
+- !<SceneObject/cb2eb30a-92cd-4d62-8998-645ec7840da6>
+  PrefabRemaps:
+    []
+  Name: PoolCard_3
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 20.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> c89949b6-3290-4e1d-b6a6-1bfda65d118f
 - !<Skin/ccf4d3bc-d3c2-4580-b9c5-62f164ef7eef>
   PrefabRemaps:
     []
@@ -4802,6 +5178,45 @@
     index-2: !<reference> 2dae2a27-8ce6-466a-8bff-622195c1b3a8
     thumb-3_end_end_end_end: !<reference> bf2095b6-c6f8-48c8-b840-e0a6cec0dc99
     wrist_to_pinky: !<reference> 3b4f5057-b516-4d3b-9c8d-14c81af2f505
+- !<Text3D/cd70eaae-d809-4e79-b410-83725cc972d1>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 1ecaa59a-8db3-44c7-a65c-dc49f2f99f64
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/ce2213a1-7aa1-4201-a3c7-c2aaa06fd4ff>
   PrefabRemaps:
     []
@@ -4847,21 +5262,6 @@
     []
   Components:
     - !<own> ae259ef8-63ca-4fdc-8664-6687a9a8aaea
-- !<SceneObject/d02ea4d8-d048-4867-9b6a-5feb6fd0dffd>
-  PrefabRemaps:
-    []
-  Name: Card_Hackathon
-  Enabled: true
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: -9.000000, z: 14.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> 9f3ebd99-e519-4c86-ac20-67128c541fe8
 - !<SceneObject/d08269e3-acd4-4156-b5b9-477ca259611d>
   PrefabRemaps:
     []
@@ -4961,6 +5361,45 @@
     CapitalizationOverride: None
   DepthTest: false
   TwoSided: false
+- !<Text3D/d263a38a-79ff-4fb2-a20b-1ab1f6daabf2>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> a37d6dd8-ba29-4778-a854-b687b971b6d0
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<SceneObject/d36d1490-a6db-437d-ab77-361f0468f828>
   PrefabRemaps:
     []
@@ -5472,6 +5911,32 @@
     []
   Components:
     []
+- !<SceneObject/f11a307b-d7b3-4ea7-981f-5c07d79e8d4d>
+  PrefabRemaps:
+    []
+  Name: CardPool
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> b796d9e5-77ea-4bdb-a3d4-56e29b277ace
+    - !<own> 0dbc7ee0-c6a2-4f69-b5f6-8b61b47420b5
+    - !<own> b0f9fff8-a8df-4d37-a0bc-3ce7e77def0b
+    - !<own> cb2eb30a-92cd-4d62-8998-645ec7840da6
+    - !<own> 471cc893-435c-4554-90db-461e49544c51
+    - !<own> b6f1b843-4d71-4c01-9182-45dd0c80997c
+    - !<own> 668d38e2-1505-42f1-b0a7-aaec7107c5ab
+    - !<own> 9668beed-a9f5-412a-91a2-3d3376f62ef6
+    - !<own> 014b74e0-f914-4450-8196-e59ef4fcb75f
+    - !<own> baa1305c-ceee-49fe-91af-da66ee904712
+    - !<own> 08fc7dc0-8618-47f9-9340-4d6cb717249f
+    - !<own> 3506a1f6-8e51-4043-aa9a-ccd1eec3a203
+  Components:
+    []
 - !<SceneObject/f36287fd-ed56-442d-ba20-78f9ef6f3502>
   PrefabRemaps:
     []
@@ -5731,6 +6196,45 @@
     []
   Components:
     - !<own> 49056624-3b56-46b7-bd81-370ecd72b8b2
+- !<Text3D/fa59e25e-a70f-4d33-a7b2-39dafc30a666>
+  PrefabRemaps:
+    []
+  Name: Text3D
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 2eb72dd6-c8c7-4e85-9b3d-8ad517283123
+  Text: 3D Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 11.000000
+  ExtrusionDepth: 0.400000
+  ExtrudeDirection: Both
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  EnableBatching: false
 - !<ScriptComponent/fb050d91-8858-49e6-bd0f-51369fb9ea83>
   PrefabRemaps:
     []

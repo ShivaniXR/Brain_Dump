@@ -151,7 +151,7 @@ export class RingCapacityTests extends BaseScriptComponent {
 
     // -- Wiring: TaskStore delegates placement to RingCapacity --
     {
-      const store = new TaskStore();
+      const store = new TaskStore(null); // null = no persistence (hermetic)
       const parsed = [];
       for (let i = 1; i <= 6; i++) {
         parsed.push(makePlacedTask({ title: "u" + i, urgency: "now", category: "home" }));

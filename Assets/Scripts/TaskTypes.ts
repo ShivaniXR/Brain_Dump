@@ -33,6 +33,35 @@ export interface PlacedTask extends Task {
   completedAt?: number;
 }
 
+export function isRing(v: unknown): v is Ring {
+  return isUrgency(v);
+}
+
+/**
+ * Rebuild a PlacedTask from untrusted (persisted/JSON) data, or null if it can't be
+ * trusted. Used when reloading tasks from persistent storage across sessions.
+ */
+export function restorePlacedTask(raw: unknown): PlacedTask | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  if (typeof o.id !== "string") return null;
+  const base = toTask({ title: o.title as string, urgency: o.urgency, category: o.category } as Task);
+  if (!base) return null;
+  if (!isRing(o.ring)) return null;
+  const result: PlacedTask = {
+    id: o.id,
+    title: base.title,
+    urgency: base.urgency,
+    category: base.category,
+    ring: o.ring,
+    status: o.status === "done" ? "done" : "active",
+    enteredAt: typeof o.enteredAt === "number" ? o.enteredAt : 0,
+    createdAt: typeof o.createdAt === "number" ? o.createdAt : Date.now(),
+  };
+  if (typeof o.completedAt === "number") result.completedAt = o.completedAt;
+  return result;
+}
+
 let _idCounter = 0;
 
 /** Wrap an LLM Task into a PlacedTask (ring is assigned later by the store). */

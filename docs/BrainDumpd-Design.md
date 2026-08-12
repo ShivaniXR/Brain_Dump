@@ -127,8 +127,11 @@ target placed ~150–200 cm from the user.
    cascade), and helpers (`countOn`, `isFull`, `longestSittingOn`, `outwardRing`). Generic over any
    `RingItem` so it preserves the caller's extra fields.
 5. **TaskStore** — single source of truth. Holds the active board + completed list; `add`/`addAll`,
-   `promote`, `complete`, `getByRing`, `clear`. **Delegates all capacity/placement to RingCapacity**
-   and (later) serializes to `PersistentStorageSystem`. No rendering logic.
+   `promote`, `complete`, `getByRing`, `clear`. **Delegates all capacity/placement to RingCapacity.**
+   **Persists** the full board (active + completed, incl. each task's `ring`, `enteredAt`, and
+   completion state) to an injectable `KeyValueStore` — the Lens `PersistentStorageSystem` by
+   default — auto-saving on every mutation and auto-loading on construction, so a fresh session
+   restores the previous board identically (verified by `PersistenceTests.ts`). No rendering logic.
 6. **RingLayoutController** — subscribes to `TaskStore` changes; positions cards into ring
    slots, applies the cone Z-depths, and animates entries/exits and overflow/displacement.
 7. **AnchorController** — wall raycast against World Mesh, create/save/load the spatial
@@ -165,6 +168,33 @@ spatial outcome is "re-place the target," not "lost my brain dump."
 
 **Schema migration:** `schemaVersion` is checked on load; unknown/newer versions fall back to
 a defensive parse that drops unrecognized fields rather than throwing.
+
+### 5.1 SPECS anchor API (confirmed)
+
+Uses **`LocatedAtComponent`** (attaches `TargetRoot` to a real-world `LocationAsset`; fires
+`onFound` when the space relocalizes, `onLost` when it drops) + **`LocationCloudStorage`**
+(`storeLocation` → `persistedLocationId`; `retrieveLocation(id)` → the map next session). The
+`persistedLocationId` is saved next to the tasks in `PersistentStorageSystem`. Caveats: cloud-
+backed (network dependency, ties into F3); relocalization is **device-only** — it cannot be
+verified in the editor preview.
+
+### 5.2 Reload, relocalization & fly-in behavior (confirmed)
+
+Placement (which ring each task belongs to) is always computed by `RingCapacity`. What differs by
+branch is *display*:
+
+- **Same room** (`onFound`): rings appear on the anchored wall; every card spawns floating in
+  front of the user and **flies (staggered) to its ring slot** (Now→centre, Next→middle, Later→outer).
+- **New/different room** (anchor retrieved but never `onFound`): the wall rings are not shown.
+  - **Now cards float in front of the user** — a portable stack (≤3) that travels with them.
+  - **Next/Later cards are hidden** — they exist only on the rings in the anchored room.
+  - A **fresh brain dump in a new room**: new **Now** cards stay (join the floating stack); new
+    **Next/Later** cards **fly off and disappear** (they belong to the wall in the old room).
+- **Re-anchor:** a button beside the target re-attaches the rings to a new wall (mints a fresh
+  `LocationAsset`, stores it, saves the new id). After re-anchoring, all cards display on the new wall.
+
+**Animation:** cards always originate in front of the user; staggered timing; easing at
+implementer's discretion. Owned by `RingLayoutController` (pure presentation).
 
 ---
 

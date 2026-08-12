@@ -1,0 +1,49 @@
+- !<AssetImportMetadata/4fb10681-3dd8-441a-b979-8046e5324951>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> e7979ff8-277e-450c-a389-afd78cc80c13
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> e7979ff8-277e-450c-a389-afd78cc80c13
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 4051f549-cbbf-4aa5-aebd-e9d9d81720af
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/4051f549-cbbf-4aa5-aebd-e9d9d81720af>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: c23ce076-76dc-4bff-bbfd-f1414c0db1b5
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    flyDuration: false
+    stagger: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - flyDuration: !<float> 3.000000
+      stagger: 0.600000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input float flyDuration = 0.7 {"hint":"Seconds each card takes to fly from the spawn point to its ring slot."}'
+    - '// @input float stagger = 0.12 {"hint":"Delay between successive cards starting their fly-in."}'
