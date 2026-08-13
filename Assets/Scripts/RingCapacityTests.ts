@@ -180,6 +180,24 @@ export class RingCapacityTests extends BaseScriptComponent {
       );
     }
 
+    // -- Dedup: re-adding a task whose title already exists is skipped (case-insensitive) --
+    {
+      const store = new TaskStore(null);
+      store.addAll([
+        makePlacedTask({ title: "Buy milk", urgency: "now", category: "errand" }),
+        makePlacedTask({ title: "Call mom", urgency: "next", category: "home" }),
+      ]);
+      store.addAll([
+        makePlacedTask({ title: "buy milk", urgency: "now", category: "errand" }), // duplicate
+        makePlacedTask({ title: "New task", urgency: "later", category: "work" }),
+      ]);
+      this.check(
+        "dedup: duplicate title skipped, new task added (3 total)",
+        store.getAll().length === 3,
+        "count=" + store.getAll().length
+      );
+    }
+
     print("[RING] ===== SUMMARY: " + this.passed + " passed, " + this.failed + " failed =====");
     print(this.failed === 0 ? "[RING] RESULT: ALL TESTS PASSED" : "[RING] RESULT: SOME TESTS FAILED");
   }

@@ -1,20 +1,20 @@
-- !<AssetImportMetadata/cc91c69b-a196-4c46-ae5c-849995bfac0f>
+- !<AssetImportMetadata/308c204b-9e65-4299-aa9c-09fba2860dc9>
   ImportedAssetIds:
-    TypeScriptAsset: !<reference> dba81355-1e9f-4102-a1c5-53dc56327604
+    TypeScriptAsset: !<reference> 4355f3cf-88da-4e74-9fa3-baef21f3362f
   ImporterName: TypeScriptAssetImporter
-  PrimaryAsset: !<reference> dba81355-1e9f-4102-a1c5-53dc56327604
+  PrimaryAsset: !<reference> 4355f3cf-88da-4e74-9fa3-baef21f3362f
   PackageType: NotAPackage
   LegacyPackagePolicy: ~
   ExtraData:
     {}
   AssetDataMap:
-    TypeScriptAsset: !<own> ef95fe91-cafe-46b2-bac5-ac1c47b0c558
+    TypeScriptAsset: !<own> 370b5e05-8949-49bc-8f37-907936e68465
   DependentFiles:
     []
   ImporterSettings: !<AssetImporterSettings>
     {}
   CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
-- !<TypeScriptAssetData/ef95fe91-cafe-46b2-bac5-ac1c47b0c558>
+- !<TypeScriptAssetData/370b5e05-8949-49bc-8f37-907936e68465>
   SvgIcon: ""
   SetupScript:
     code: ""
@@ -24,11 +24,11 @@
   VersionPatch: 0
   VersionPrerelease: ""
   UpdateOrder: 0
-  ComponentUid: d781967c-17af-4992-a372-9720728f8f72
+  ComponentUid: 0f78b44a-57f0-46bc-ad74-5d8b60de215b
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    editorSimulateDump: false
+    {}
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -38,9 +38,10 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - editorSimulateDump: true
+    -
+      {}
   ScriptTypes:
     -
       {}
   InputLines:
-    - '// @input bool editorSimulateDump {"hint":"Editor only: tap injects a canned brain dump through the full pipeline (no mic needed). Off = tap does real voice capture."}'
+    []

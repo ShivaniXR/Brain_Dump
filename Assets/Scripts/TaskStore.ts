@@ -40,6 +40,22 @@ export class TaskStore {
   private completed: PlacedTask[] = [];
   private store: KeyValueStore | null;
   private storageKey: string;
+  private listeners: (() => void)[] = [];
+
+  /** Subscribe to board changes (fired after any mutation persists). */
+  onChange(cb: () => void): void {
+    this.listeners.push(cb);
+  }
+
+  private notify(): void {
+    for (let i = 0; i < this.listeners.length; i++) this.listeners[i]();
+  }
+
+  /** Persist + notify. Called by every mutation. */
+  private commitChange(): void {
+    this.persist();
+    this.notify();
+  }
 
   /**
    * @param store  where to persist. `undefined` (default) uses the Lens persistent
@@ -70,18 +86,73 @@ export class TaskStore {
     return this.completed.slice();
   }
 
-  // --- mutations (each persists) -------------------------------------------
-
-  /** Fresh-parse placement of one task: overflow outward, no displacement. */
-  add(task: PlacedTask): void {
-    this.active = placeParsedBatch(this.active, [task]);
-    this.persist();
+  /**
+   * A multi-line, ring-grouped dump of the board for logging/testing. Within each ring
+   * tasks are sorted by enteredAt (longest-sitting first), showing title, category,
+   * original urgency, and the enteredAt stamp.
+   */
+  describe(): string {
+    const rings: Ring[] = ["now", "next", "later"];
+    const lines: string[] = ["[Board] ===== tasks ====="];
+    for (let r = 0; r < rings.length; r++) {
+      const ring = rings[r];
+      const tasks = this.getByRing(ring).sort((a, b) => a.enteredAt - b.enteredAt);
+      lines.push("[Board] " + ring.toUpperCase() + " (" + tasks.length + "):");
+      for (let i = 0; i < tasks.length; i++) {
+        const t = tasks[i];
+        lines.push(
+          "[Board]   " +
+            (i + 1) +
+            ". " +
+            t.title +
+            "  <cat:" +
+            t.category +
+            " urg:" +
+            t.urgency +
+            " @" +
+            t.enteredAt +
+            ">"
+        );
+      }
+    }
+    lines.push("[Board] completed: " + this.completed.length);
+    return lines.join("\n");
   }
 
-  /** Fresh-parse placement of a batch, preserving LLM order. */
+  // --- mutations (each persists) -------------------------------------------
+
+  private normalizeTitle(title: string): string {
+    return title.trim().toLowerCase();
+  }
+
+  /** Drop tasks whose title already exists on the active board, and de-dup within the batch. */
+  private dedup(tasks: PlacedTask[]): PlacedTask[] {
+    const seen: { [key: string]: boolean } = {};
+    for (let i = 0; i < this.active.length; i++) seen[this.normalizeTitle(this.active[i].title)] = true;
+    const fresh: PlacedTask[] = [];
+    for (let i = 0; i < tasks.length; i++) {
+      const key = this.normalizeTitle(tasks[i].title);
+      if (seen[key]) continue; // duplicate of a board task or an earlier task in this batch
+      seen[key] = true;
+      fresh.push(tasks[i]);
+    }
+    return fresh;
+  }
+
+  /** Fresh-parse placement of one task: overflow outward, no displacement. Skips duplicates. */
+  add(task: PlacedTask): void {
+    const fresh = this.dedup([task]);
+    if (fresh.length === 0) return; // already on the board
+    this.active = placeParsedBatch(this.active, fresh);
+    this.commitChange();
+  }
+
+  /** Fresh-parse placement of a batch, preserving LLM order. Skips duplicate titles. */
   addAll(tasks: PlacedTask[]): void {
-    this.active = placeParsedBatch(this.active, tasks);
-    this.persist();
+    const fresh = this.dedup(tasks);
+    if (fresh.length === 0) return; // nothing new to add
+    this.active = placeParsedBatch(this.active, fresh);
+    this.commitChange();
   }
 
   /**
@@ -90,7 +161,7 @@ export class TaskStore {
    */
   promote(id: string, toRing: Ring): void {
     this.active = ringPromote(this.active, id, toRing);
-    this.persist();
+    this.commitChange();
   }
 
   /** Mark a task done and remove it from the board. Never auto-promotes (locked: manual). */
@@ -101,13 +172,13 @@ export class TaskStore {
     t.completedAt = Date.now();
     this.active = this.active.filter((x) => x.id !== id);
     this.completed = this.completed.concat([t]);
-    this.persist();
+    this.commitChange();
   }
 
   clear(): void {
     this.active = [];
     this.completed = [];
-    this.persist();
+    this.commitChange();
   }
 
   // --- persistence ---------------------------------------------------------

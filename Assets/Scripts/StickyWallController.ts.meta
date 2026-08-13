@@ -1,0 +1,61 @@
+- !<AssetImportMetadata/b507c319-00f1-4fb0-a6e9-d6942fc791f5>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 286c3036-36e8-4727-b58b-4284b17cbff2
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 286c3036-36e8-4727-b58b-4284b17cbff2
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 08e2de10-86c6-434f-b234-d9edd21a96e0
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/08e2de10-86c6-434f-b234-d9edd21a96e0>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 971a83cd-fa0f-49c1-b4d1-2115580acef9
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    matLater: false
+    matNext: false
+    matNow: false
+    popDuration: false
+    stagger: false
+    template: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - template: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      matNow: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      matNext: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      matLater: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      popDuration: 0.320000
+      stagger: 0.090000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject template
+    - // @input Asset.Material matNow
+    - // @input Asset.Material matNext
+    - // @input Asset.Material matLater
+    - // @input float popDuration = 0.32
+    - // @input float stagger = 0.09

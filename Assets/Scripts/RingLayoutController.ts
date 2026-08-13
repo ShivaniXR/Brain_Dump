@@ -12,7 +12,9 @@
  * Attach to the target root (BrainDumpd_Target); pooled cards live under its "CardPool" child.
  */
 import { TaskStore } from "./TaskStore";
-import { Task, PlacedTask, Ring, makePlacedTask } from "./TaskTypes";
+import { getTaskStore } from "./TaskStoreProvider";
+import { getAnchorState, onAnchorStateChange } from "./AnchorStateProvider";
+import { Ring } from "./TaskTypes";
 
 @component
 export class RingLayoutController extends BaseScriptComponent {
@@ -33,6 +35,7 @@ export class RingLayoutController extends BaseScriptComponent {
 
   private store: TaskStore;
   private pool: SceneObject[] = [];
+  private ringMeshes: SceneObject[] = []; // NowRing / NextRing / LaterRing
   private anims: { obj: SceneObject; from: vec3; to: vec3; delay: number }[] = [];
   private elapsed = 0;
 
@@ -42,20 +45,21 @@ export class RingLayoutController extends BaseScriptComponent {
   }
 
   private setup(): void {
-    this.collectPool();
-    this.store = new TaskStore(null); // in-memory demo store (no persistence side effects)
-    if (this.store.getAll().length === 0) this.seedSample();
-    this.render();
+    this.collectChildren();
+    this.store = getTaskStore(); // shared, persistent store (also written by BrainDumpController)
+    this.store.onChange(() => this.render()); // re-render whenever a voice dump adds tasks
+    onAnchorStateChange(() => this.render()); // re-render when anchoring goes located <-> unlocated
+    this.render(); // initial render of any persisted tasks
   }
 
-  private collectPool(): void {
+  private collectChildren(): void {
     const root = this.getSceneObject();
     let cardPool: SceneObject | null = null;
     for (let i = 0; i < root.getChildrenCount(); i++) {
       const ch = root.getChild(i);
-      if (ch.name === "CardPool") {
-        cardPool = ch;
-        break;
+      if (ch.name === "CardPool") cardPool = ch;
+      else if (ch.name === "NowRing" || ch.name === "NextRing" || ch.name === "LaterRing") {
+        this.ringMeshes.push(ch);
       }
     }
     if (!cardPool) {
@@ -69,25 +73,19 @@ export class RingLayoutController extends BaseScriptComponent {
     }
   }
 
-  private seedSample(): void {
-    // 4 "now" (one overflows to Next), 2 "next", 1 "later" — exercises overflow + spread.
-    const sample: Task[] = [
-      { title: "Attend important meeting", urgency: "now", category: "work" },
-      { title: "Call the plumber urgently", urgency: "now", category: "home" },
-      { title: "Finish the tax forms", urgency: "now", category: "home" },
-      { title: "Prepare demo slides", urgency: "now", category: "work" },
-      { title: "Get a haircut", urgency: "next", category: "errand" },
-      { title: "Submit hackathon project", urgency: "next", category: "work" },
-      { title: "Apply for residency program", urgency: "later", category: "work" },
-    ];
-    const tasks: PlacedTask[] = sample.map((t) => makePlacedTask(t));
-    this.store.addAll(tasks);
-  }
-
   private render(): void {
+    // Reset the pool + animation so re-renders (after a new voice dump) rebind cleanly.
+    for (let i = 0; i < this.pool.length; i++) this.pool[i].enabled = false;
     this.anims = [];
+    this.elapsed = 0;
+
+    // Anchor branch: located (same room) shows the wall rings + all cards; unlocated
+    // (new room) hides the rings and shows only Now cards floating in front of the user.
+    const located = getAnchorState() !== "unlocated";
+    for (let i = 0; i < this.ringMeshes.length; i++) this.ringMeshes[i].enabled = located;
+
     let poolIdx = 0;
-    const rings: Ring[] = ["now", "next", "later"];
+    const rings: Ring[] = located ? ["now", "next", "later"] : ["now"];
     for (let r = 0; r < rings.length; r++) {
       const ring = rings[r];
       const tasks = this.store.getByRing(ring);
@@ -100,7 +98,7 @@ export class RingLayoutController extends BaseScriptComponent {
         if (text3d) text3d.text = tasks[i].title;
         card.enabled = true;
 
-        const slot = this.slotFor(ring, i, tasks.length);
+        const slot = this.slotFor(ring, i, tasks.length, located);
         card.getTransform().setLocalPosition(this.spawnLocal);
         this.anims.push({
           obj: card,
@@ -113,7 +111,9 @@ export class RingLayoutController extends BaseScriptComponent {
     print(
       "[BrainDumpd] RingLayoutController: rendered " +
         this.anims.length +
-        " data-driven cards (now=" +
+        " cards [" +
+        getAnchorState() +
+        "] (now=" +
         this.store.countOn("now") +
         " next=" +
         this.store.countOn("next") +
@@ -123,8 +123,17 @@ export class RingLayoutController extends BaseScriptComponent {
     );
   }
 
-  /** Local-space slot for the i-th card on a ring. Now = vertical stack; Next/Later = around the ring. */
-  private slotFor(ring: Ring, i: number, count: number): vec3 {
+  /**
+   * Local-space slot for the i-th card on a ring.
+   *  - located: Now = vertical stack at centre; Next/Later = around their ring.
+   *  - unlocated: Now = a vertical stack floating in front of the user (portable HUD).
+   */
+  private slotFor(ring: Ring, i: number, count: number, located: boolean): vec3 {
+    if (!located) {
+      // Floating Now stack in front of the user (larger +Z = toward camera).
+      const mid = (count - 1) / 2;
+      return new vec3(0, (mid - i) * 4.2, 62);
+    }
     if (ring === "now") {
       const mid = (count - 1) / 2;
       return new vec3(0, (mid - i) * 3.4, this.SLOT_Z);

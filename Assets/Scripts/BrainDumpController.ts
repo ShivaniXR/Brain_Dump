@@ -17,7 +17,8 @@
  * the scene with your OpenAI token filled in, or the LLM call will fail to auth.
  */
 import { TaskExtractor, OpenAITaskExtractor } from "./LLMService";
-import { Task } from "./TaskTypes";
+import { Task, makePlacedTask } from "./TaskTypes";
+import { getTaskStore } from "./TaskStoreProvider";
 
 // Brief pauses are normal in a brain dump, so tolerate a long silence before the
 // ASR segment is finalized. Tune down if end-of-speech should be snappier.
@@ -31,8 +32,20 @@ export class BrainDumpController extends BaseScriptComponent {
   private asr = require("LensStudio:AsrModule") as AsrModule;
   private gestureModule = require("LensStudio:GestureModule") as GestureModule;
 
+  @input
+  @hint("Editor only: tap injects a canned brain dump through the full pipeline (no mic needed). Off = tap does real voice capture.")
+  editorSimulateDump: boolean = false;
+
   private options: AsrModule.AsrTranscriptionOptions;
   private isListening = false;
+
+  // Canned transcripts cycled by the editor simulate-dump affordance.
+  private demoTranscripts: string[] = [
+    "I really need to finish the tax forms today and get a haircut sometime.",
+    "Urgent: reply to the client email and prepare the demo slides. Also water the plants eventually.",
+    "Call the plumber now, submit the hackathon project, and apply for a residency program someday.",
+  ];
+  private demoIndex = 0;
 
   // Transcript accumulation: finalized segments + the latest in-flight interim.
   private finalizedText = "";
@@ -70,8 +83,15 @@ export class BrainDumpController extends BaseScriptComponent {
 
   private bindTrigger(): void {
     if (global.deviceInfoSystem.isEditor()) {
-      // No hand tracking in the editor — use tap to toggle.
-      this.createEvent("TapEvent").bind(() => this.toggle());
+      // No hand tracking in the editor. Tap either simulates a full dump (default,
+      // for testing the pipeline without a mic) or toggles ASR like on device.
+      this.createEvent("TapEvent").bind(() => {
+        if (this.editorSimulateDump) {
+          this.simulateDump();
+        } else {
+          this.toggle();
+        }
+      });
     } else {
       // Right-hand pinch. Numeric literal cast: the runtime enum isn't exposed as a value.
       const rightHand = 1 as unknown as GestureModule.HandType;
@@ -117,8 +137,27 @@ export class BrainDumpController extends BaseScriptComponent {
 
     this.extractor
       .extractTasks(transcript)
-      .then((tasks) => this.printTasks(tasks))
+      .then((tasks) => {
+        this.printTasks(tasks);
+        this.commitTasks(tasks);
+      })
       .catch((error) => print("[BrainDumpd] LLM error: " + error));
+  }
+
+  /** Push parsed tasks into the shared board; RingLayoutController re-renders via onChange. */
+  private commitTasks(tasks: Task[]): void {
+    if (tasks.length === 0) return;
+    const placed = tasks.map((t) => makePlacedTask(t));
+    getTaskStore().addAll(placed);
+    print("[BrainDumpd] Committed " + placed.length + " task(s) to the board.");
+  }
+
+  /** Editor affordance: run a canned transcript through the real pipeline. */
+  private simulateDump(): void {
+    const transcript = this.demoTranscripts[this.demoIndex % this.demoTranscripts.length];
+    this.demoIndex += 1;
+    print("[BrainDumpd] (editor) Simulating voice dump: " + transcript);
+    this.processTranscript(transcript);
   }
 
   private printTasks(tasks: Task[]): void {

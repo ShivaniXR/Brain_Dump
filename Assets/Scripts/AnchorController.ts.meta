@@ -1,0 +1,49 @@
+- !<AssetImportMetadata/efef4821-b4ed-455c-a75c-18819dcf3fb1>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 6b5d2056-7666-4032-9636-36a708aec800
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 6b5d2056-7666-4032-9636-36a708aec800
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> dd07a417-4bf8-40a5-a99c-4a306fad6efd
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/dd07a417-4bf8-40a5-a99c-4a306fad6efd>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: a8d5b33d-98e9-491a-9389-e1cc03e97646
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    editorSimulateState: false
+    locatedAt: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - locatedAt: !<reference.LocatedAtComponent> 00000000-0000-0000-0000-000000000000
+      editorSimulateState: located
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input Component.LocatedAtComponent locatedAt {"hint":"LocatedAtComponent on the target root (device anchoring). Leave empty in the editor."}'
+    - '// @input string editorSimulateState = "located" {"hint":"Editor only: initial simulated anchor state — \"located\" or \"unlocated\"."}'

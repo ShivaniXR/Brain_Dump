@@ -196,6 +196,20 @@ branch is *display*:
 **Animation:** cards always originate in front of the user; staggered timing; easing at
 implementer's discretion. Owned by `RingLayoutController` (pure presentation).
 
+### 5.3 Implementation status
+
+- **`AnchorController`** — built. On device: loads a saved `persistedLocationId`, `retrieveLocation`
+  → `LocatedAtComponent`; `onFound` → `located`, an 8s timeout → `unlocated`. `reAnchor()` maps the
+  space (`createMappingSession`→`checkpoint`)→`storeLocation`→saves id→`located`. All device calls are
+  guarded behind `isEditor()`. Publishes state via **`AnchorStateProvider`** (singleton).
+- **`RingLayoutController`** — branches on anchor state: `located`/`searching` show rings + all cards;
+  `unlocated` hides the ring meshes + Next/Later and floats the Now stack in front. Verified in the
+  editor by simulating state.
+- **Clear board** + **re-anchor** — actions wired; **editor keys C / A / R** (clear / toggle state /
+  re-anchor) drive them for testing, and `CLEAR` / `RE-ANCHOR` button labels sit beside the target.
+- **DEVICE-ONLY, not yet verified:** the actual mapping, relocalization, and cloud store/retrieve;
+  and on-device **pinch interaction** for the buttons (SIK `Interactable`) — currently editor-key only.
+
 ---
 
 ## 6. Capacity & overflow behavior

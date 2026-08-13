@@ -1,20 +1,20 @@
-- !<AssetImportMetadata/cc91c69b-a196-4c46-ae5c-849995bfac0f>
+- !<AssetImportMetadata/7ce6646a-07b4-4e6a-97bb-05782c1a9e40>
   ImportedAssetIds:
-    TypeScriptAsset: !<reference> dba81355-1e9f-4102-a1c5-53dc56327604
+    TypeScriptAsset: !<reference> e3b2e2cb-d2bc-4494-9362-b9dc8da6e829
   ImporterName: TypeScriptAssetImporter
-  PrimaryAsset: !<reference> dba81355-1e9f-4102-a1c5-53dc56327604
+  PrimaryAsset: !<reference> e3b2e2cb-d2bc-4494-9362-b9dc8da6e829
   PackageType: NotAPackage
   LegacyPackagePolicy: ~
   ExtraData:
     {}
   AssetDataMap:
-    TypeScriptAsset: !<own> ef95fe91-cafe-46b2-bac5-ac1c47b0c558
+    TypeScriptAsset: !<own> 4ffc9d53-5584-46bb-b473-b0885311adaf
   DependentFiles:
     []
   ImporterSettings: !<AssetImporterSettings>
     {}
   CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
-- !<TypeScriptAssetData/ef95fe91-cafe-46b2-bac5-ac1c47b0c558>
+- !<TypeScriptAssetData/4ffc9d53-5584-46bb-b473-b0885311adaf>
   SvgIcon: ""
   SetupScript:
     code: ""
@@ -24,11 +24,12 @@
   VersionPatch: 0
   VersionPrerelease: ""
   UpdateOrder: 0
-  ComponentUid: d781967c-17af-4992-a372-9720728f8f72
+  ComponentUid: 01936c87-5bbd-4c07-88aa-1121c17dc520
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    editorSimulateDump: false
+    popDuration: false
+    stagger: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -38,9 +39,11 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - editorSimulateDump: true
+    - popDuration: 0.320000
+      stagger: 0.090000
   ScriptTypes:
     -
       {}
   InputLines:
-    - '// @input bool editorSimulateDump {"hint":"Editor only: tap injects a canned brain dump through the full pipeline (no mic needed). Off = tap does real voice capture."}'
+    - "// @input float popDuration = 0.32 {\"hint\":\"Seconds for each note's pop-in.\"}"
+    - '// @input float stagger = 0.09 {"hint":"Delay between successive notes slapping on."}'

@@ -1,20 +1,20 @@
-- !<AssetImportMetadata/cc91c69b-a196-4c46-ae5c-849995bfac0f>
+- !<AssetImportMetadata/29e43d2b-7e7d-493e-b212-01bfe9ac9cf2>
   ImportedAssetIds:
-    TypeScriptAsset: !<reference> dba81355-1e9f-4102-a1c5-53dc56327604
+    TypeScriptAsset: !<reference> 77ce4750-4aca-4f5d-a341-402ec4ef542b
   ImporterName: TypeScriptAssetImporter
-  PrimaryAsset: !<reference> dba81355-1e9f-4102-a1c5-53dc56327604
+  PrimaryAsset: !<reference> 77ce4750-4aca-4f5d-a341-402ec4ef542b
   PackageType: NotAPackage
   LegacyPackagePolicy: ~
   ExtraData:
     {}
   AssetDataMap:
-    TypeScriptAsset: !<own> ef95fe91-cafe-46b2-bac5-ac1c47b0c558
+    TypeScriptAsset: !<own> 3d6a984d-e7f0-4abb-b999-fdd45fbf0506
   DependentFiles:
     []
   ImporterSettings: !<AssetImporterSettings>
     {}
   CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
-- !<TypeScriptAssetData/ef95fe91-cafe-46b2-bac5-ac1c47b0c558>
+- !<TypeScriptAssetData/3d6a984d-e7f0-4abb-b999-fdd45fbf0506>
   SvgIcon: ""
   SetupScript:
     code: ""
@@ -24,11 +24,12 @@
   VersionPatch: 0
   VersionPrerelease: ""
   UpdateOrder: 0
-  ComponentUid: d781967c-17af-4992-a372-9720728f8f72
+  ComponentUid: a90614e1-16fe-49f0-b2a0-c6ea7b848252
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    editorSimulateDump: false
+    action: false
+    label: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -38,9 +39,11 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - editorSimulateDump: true
+    - action: clear
+      label: Sweep wall
   ScriptTypes:
     -
       {}
   InputLines:
-    - '// @input bool editorSimulateDump {"hint":"Editor only: tap injects a canned brain dump through the full pipeline (no mic needed). Off = tap does real voice capture."}'
+    - '// @input string action = "clear" {"hint":"\"clear\" (sweep the wall) or \"reanchor\" (move to a new wall)."}'
+    - '// @input string label = "Sweep wall" {"hint":"Text shown on the button."}'
