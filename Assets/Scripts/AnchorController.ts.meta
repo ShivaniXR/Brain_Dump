@@ -28,8 +28,11 @@
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    editorSimulateState: false
+    camera: false
     locatedAt: false
+    maxDistance: false
+    offsetFromWall: false
+    stickyWall: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -39,11 +42,17 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - locatedAt: !<reference.LocatedAtComponent> 00000000-0000-0000-0000-000000000000
-      editorSimulateState: located
+    - camera: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      stickyWall: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      locatedAt: !<reference.LocatedAtComponent> 00000000-0000-0000-0000-000000000000
+      maxDistance: !<float> 500.000000
+      offsetFromWall: !<float> 2.000000
   ScriptTypes:
     -
       {}
   InputLines:
-    - '// @input Component.LocatedAtComponent locatedAt {"hint":"LocatedAtComponent on the target root (device anchoring). Leave empty in the editor."}'
-    - '// @input string editorSimulateState = "located" {"hint":"Editor only: initial simulated anchor state — \"located\" or \"unlocated\"."}'
+    - '// @input SceneObject camera {"hint":"Camera to cast the placement ray from (its forward = look direction)."}'
+    - '// @input SceneObject stickyWall {"hint":"The board to place (StickyWall root)."}'
+    - '// @input Component.LocatedAtComponent locatedAt {"hint":"Optional LocatedAtComponent for device relocalization (Custom Locations)."}'
+    - '// @input float maxDistance = 500 {"hint":"Max ray distance for the wall hit test (cm)."}'
+    - '// @input float offsetFromWall = 2 {"hint":"How far to sit the board off the wall surface (cm)."}'

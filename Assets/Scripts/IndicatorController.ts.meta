@@ -1,20 +1,20 @@
-- !<AssetImportMetadata/4fb10681-3dd8-441a-b979-8046e5324951>
+- !<AssetImportMetadata/5f6ac3ce-0299-4085-bb0c-9568dc21c219>
   ImportedAssetIds:
-    TypeScriptAsset: !<reference> e7979ff8-277e-450c-a389-afd78cc80c13
+    TypeScriptAsset: !<reference> 8937cc68-844d-471e-a2dc-8c176339610f
   ImporterName: TypeScriptAssetImporter
-  PrimaryAsset: !<reference> e7979ff8-277e-450c-a389-afd78cc80c13
+  PrimaryAsset: !<reference> 8937cc68-844d-471e-a2dc-8c176339610f
   PackageType: NotAPackage
   LegacyPackagePolicy: ~
   ExtraData:
     {}
   AssetDataMap:
-    TypeScriptAsset: !<own> 4051f549-cbbf-4aa5-aebd-e9d9d81720af
+    TypeScriptAsset: !<own> 3104f2b4-2f6b-46d9-a3fc-0135ce96c3b4
   DependentFiles:
     []
   ImporterSettings: !<AssetImporterSettings>
     {}
   CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
-- !<TypeScriptAssetData/4051f549-cbbf-4aa5-aebd-e9d9d81720af>
+- !<TypeScriptAssetData/3104f2b4-2f6b-46d9-a3fc-0135ce96c3b4>
   SvgIcon: ""
   SetupScript:
     code: ""
@@ -24,12 +24,12 @@
   VersionPatch: 0
   VersionPrerelease: ""
   UpdateOrder: 0
-  ComponentUid: c23ce076-76dc-4bff-bbfd-f1414c0db1b5
+  ComponentUid: 62429b06-57c1-4970-acd6-ed79bc992ee7
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    flyDuration: false
-    stagger: false
+    indicator: false
+    micAudioTrack: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -39,11 +39,11 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - flyDuration: !<float> 3.000000
-      stagger: 0.600000
+    - indicator: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      micAudioTrack: !<reference.AudioTrackAsset> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
   InputLines:
-    - '// @input float flyDuration = 0.7 {"hint":"Seconds each card takes to fly from the spawn point to its ring slot."}'
-    - '// @input float stagger = 0.12 {"hint":"Delay between successive cards starting their fly-in."}'
+    - // @input SceneObject indicator
+    - '// @input Asset.AudioTrackAsset micAudioTrack {"hint":"Optional Microphone audio track — wire it for true volume-reactive pulsing."}'

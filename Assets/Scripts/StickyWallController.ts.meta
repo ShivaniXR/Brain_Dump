@@ -28,12 +28,16 @@
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
+    ballScaleCm: false
+    floorDropCm: false
     matLater: false
     matNext: false
     matNow: false
+    paperBall: false
     popDuration: false
     stagger: false
     template: false
+    throwSpeed: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -49,6 +53,10 @@
       matLater: !<reference.Material> 00000000-0000-0000-0000-000000000000
       popDuration: 0.320000
       stagger: 0.090000
+      paperBall: !<reference.ObjectPrefab> 00000000-0000-0000-0000-000000000000
+      throwSpeed: !<float> 45.000000
+      floorDropCm: !<float> 150.000000
+      ballScaleCm: !<float> 11.000000
   ScriptTypes:
     -
       {}
@@ -59,3 +67,7 @@
     - // @input Asset.Material matLater
     - // @input float popDuration = 0.32
     - // @input float stagger = 0.09
+    - '// @input Asset.ObjectPrefab paperBall {"hint":"Crumpled paper-ball prefab spawned when a note is thrown or dragged off to delete it."}'
+    - '// @input float throwSpeed = 45 {"hint":"Release speed (cm/s) above which a drag counts as a throw-to-delete."}'
+    - '// @input float floorDropCm = 150 {"hint":"How far below the board (cm) the invisible floor sits — where crumpled balls land and rest."}'
+    - '// @input float ballScaleCm = 11 {"hint":"World size (cm) of the crumpled paper ball."}'

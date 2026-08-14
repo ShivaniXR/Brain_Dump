@@ -450,7 +450,7 @@
       value: {x: 0.990000, y: 0.820000, z: 0.100000, w: 1.000000}
     frontCapStartingColor:
       typeIdx: 5
-      value: {x: 0.200000, y: 0.200000, z: 0.220000, w: 1.000000}
+      value: {x: 0.950000, y: 0.350000, z: 0.300000, w: 1.000000}
     outerEdgeEndingColor:
       typeIdx: 5
       value: {x: 0.990000, y: 0.820000, z: 0.100000, w: 1.000000}

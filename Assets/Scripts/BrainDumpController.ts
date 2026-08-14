@@ -19,6 +19,8 @@
 import { TaskExtractor, OpenAITaskExtractor } from "./LLMService";
 import { Task, makePlacedTask } from "./TaskTypes";
 import { getTaskStore } from "./TaskStoreProvider";
+import { isPlacing } from "./AnchorStateProvider";
+import { setCaptureState, onRecordToggleRequest } from "./CaptureStateProvider";
 
 // Brief pauses are normal in a brain dump, so tolerate a long silence before the
 // ASR segment is finalized. Tune down if end-of-speech should be snappier.
@@ -54,6 +56,10 @@ export class BrainDumpController extends BaseScriptComponent {
   onAwake(): void {
     this.setupAsrOptions();
     this.bindTrigger();
+    onRecordToggleRequest(() => {
+      if (isPlacing()) return; // place the wall first; mic is live once located
+      this.toggle();
+    }); // mic button
     print("[BrainDumpd] Ready. Pinch (or tap in editor) to start/stop a brain dump.");
   }
 
@@ -86,6 +92,7 @@ export class BrainDumpController extends BaseScriptComponent {
       // No hand tracking in the editor. Tap either simulates a full dump (default,
       // for testing the pipeline without a mic) or toggles ASR like on device.
       this.createEvent("TapEvent").bind(() => {
+        if (isPlacing()) return; // while placing, taps confirm placement (AnchorController)
         if (this.editorSimulateDump) {
           this.simulateDump();
         } else {
@@ -95,7 +102,10 @@ export class BrainDumpController extends BaseScriptComponent {
     } else {
       // Right-hand pinch. Numeric literal cast: the runtime enum isn't exposed as a value.
       const rightHand = 1 as unknown as GestureModule.HandType;
-      this.gestureModule.getPinchDownEvent(rightHand).add(() => this.toggle());
+      this.gestureModule.getPinchDownEvent(rightHand).add(() => {
+        if (isPlacing()) return;
+        this.toggle();
+      });
     }
   }
 
@@ -112,6 +122,7 @@ export class BrainDumpController extends BaseScriptComponent {
     this.currentInterim = "";
     this.isListening = true;
     this.asr.startTranscribing(this.options);
+    setCaptureState("listening");
     print("[BrainDumpd] ▶ Listening started. Speak your brain dump, then pinch/tap to stop.");
   }
 
@@ -130,18 +141,24 @@ export class BrainDumpController extends BaseScriptComponent {
   private processTranscript(transcript: string): void {
     if (!transcript) {
       print("[BrainDumpd] Empty transcript — nothing to parse.");
+      setCaptureState("idle");
       return;
     }
     print("[BrainDumpd] Transcript: " + transcript);
     print("[BrainDumpd] Sending to LLM...");
+    setCaptureState("thinking");
 
     this.extractor
       .extractTasks(transcript)
       .then((tasks) => {
         this.printTasks(tasks);
         this.commitTasks(tasks);
+        setCaptureState("idle");
       })
-      .catch((error) => print("[BrainDumpd] LLM error: " + error));
+      .catch((error) => {
+        print("[BrainDumpd] LLM error: " + error);
+        setCaptureState("idle");
+      });
   }
 
   /** Push parsed tasks into the shared board; RingLayoutController re-renders via onChange. */

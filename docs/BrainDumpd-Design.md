@@ -2,16 +2,23 @@
 
 **Platform:** Snap Spectacles (SPECS), Lens Studio 5.23, Spectacles-only target.
 **Concept:** User speaks a stream of unstructured thoughts → an LLM parses them into
-discrete tasks with an urgency level → tasks are placed on a wall-anchored *target*
-made of three concentric rings that form a shallow cone protruding toward the user.
+discrete tasks with an urgency level → tasks appear as **colour-coded sticky notes** on a
+**wall-anchored board** laid out in three columns.
 
-- **Now** — centre disc, protrudes furthest toward the user, **max 3 tasks**
-- **Next** — middle ring, **max 8 tasks**
-- **Later** — outer ring, sits nearly on the wall, **unbounded**
+- **Now** — coral column, **max 3 tasks**
+- **Next** — yellow column, **max 8 tasks**
+- **Later** — blue column, **unbounded**
 
-> Status: DESIGN ONLY. No code is written yet. API names marked *(verify)* should be
-> confirmed against `Support/*.d.ts` and the Lens Studio knowledge base (needs Snapchat
-> login) before implementation. The architecture does not depend on those exact names.
+> **Presentation note:** an earlier design placed tasks on a three-ring "cone" target (and a
+> Calder-mobile variant was prototyped); both were dropped for legibility/feel. The current
+> presentation is the **Sticky Wall** (§3). The data/logic layers below are unchanged by that
+> pivot — only the presentation module differs.
+
+> **Status: substantially built.** Data model, parsing/fallback, capacity engine, persistence,
+> and dedup are implemented and unit-tested. The Sticky Wall presentation, the Sweep/New-wall
+> buttons, and grab/peel wiring are built and editor-verified. **Device-only (built, not yet
+> verified on hardware):** hand-tracking interactions (button pinch, note drag/peel) and real
+> wall mapping/relocalization.
 
 ---
 
@@ -21,11 +28,11 @@ made of three concentric rings that form a shallow cone protruding toward the us
 |---|---|---|
 | Voice capture / ASR | **`AsrModule`** (`startTranscribing`/`stopTranscribing`, `onTranscriptionUpdateEvent` with `text`/`isFinal`, `AsrMode.HighAccuracy`) — locked, see §10 | Replaces the now-deprecated `VoiceMLModule` transcription path. Requires microphone permission. |
 | LLM call | **Remote Service Gateway (RSG)** → **OpenAI `gpt-4o-mini`** with Structured Outputs (locked, see §10) | Package installed. Fallback: Gemini Flash (one-file swap in `LLMService`). |
-| Wall detection | **World Mesh** + **Depth / World Query** raycast | Gives hit point + surface normal for a vertical plane. |
-| Spatial persistence | **Spatial Anchors** (`AnchorModule` / `AnchorComponent`) *(verify names)* | Relocalizes an anchor across sessions in the same mapped space. |
-| Data persistence | `PersistentStorageSystem` (key-value, per-Lens, on device) | Store the task list as JSON. |
-| Interaction | **SpectaclesInteractionKit** (pinch, direct/indirect manipulation) — installed | Grab/move cards, pinch-to-complete. |
-| World-space UI | **SpectaclesUIKit** — installed; Text + mesh components | Ring visuals, labels, HUD. |
+| Wall mapping | **Custom Locations** mapping session (`createMappingSession` → `checkpoint`) | Maps the current space to a `LocationAsset` when (re-)anchoring. |
+| Data persistence | `PersistentStorageSystem` (key-value, per-Lens, on device) | Stores the task board + the `persistedLocationId` as JSON. |
+| Interaction | **SpectaclesInteractionKit** (`Interactable`, `InteractableManipulation`) — installed | Drag notes between columns to re-prioritize; drag a note off the bottom to complete (peel); pressable wall buttons. |
+| World-space UI | **SpectaclesUIKit** — installed; Text3D + box/plane meshes | Sticky-note panels, column headers, wall buttons. |
+| Spatial persistence | **Custom Locations**: `LocatedAtComponent` + `LocationCloudStorage` (confirmed, see §5.1) | Relocalizes the board's wall across sessions in the same space. |
 
 **Design principle that falls out of this:** *spatial persistence and data persistence are
 independent layers.* Task data lives in `PersistentStorageSystem` and always survives; the
@@ -41,7 +48,11 @@ A task carries **two placement concepts** that must stay separate:
 - `urgency` — what the LLM inferred the user *meant* (now / next / later).
 - `ring` — where the task *actually landed* after capacity + overflow rules.
 
-They differ whenever a ring is full. Keeping both lets the UI explain "you said this was
+> **Terminology:** `ring` is the code/data name for the tier a task sits in (`Ring` type,
+> `ring` field, `RingCapacity`), kept from the earlier ring design. In the Sticky Wall a task's
+> `ring` is simply which **column** it's in — Now / Next / Later.
+
+They differ whenever a tier is full. Keeping both lets the UI explain "you said this was
 urgent, but Now was full, so it's in Next."
 
 ```ts
@@ -75,73 +86,71 @@ interface PersistState {
 
 ## 3. Scene hierarchy
 
-Managers sit at the top of the hierarchy so they initialize before anything that depends on
-them (per Lens Studio execution order). The target is parented under the anchor so it moves
-with relocalization.
+Controllers initialize before dependents (Lens Studio execution order). The board is parented
+under the wall anchor so it relocalizes with the room.
 
 ```text
 Scene
-├── Managers                      (empty SceneObject, top of hierarchy)
-│   ├── AppController             state machine + wiring
-│   ├── VoiceCaptureController    ASR start/stop, interim/final transcript
-│   ├── LLMService                RSG call + JSON parse/validate
-│   ├── TaskStore                 source of truth, capacity rules, persistence
-│   └── AnchorController          wall raycast, anchor create/save/load
-│
-├── WallAnchor                    (holds AnchorComponent; pose set at placement)
-│   └── TargetRoot                cone origin, oriented to face the user
-│       ├── NowRing               centre disc; large +Z offset (toward user)
-│       │   └── SlotContainer     ≤ 3 card slots
-│       ├── NextRing              middle ring; medium +Z offset
-│       │   └── SlotContainer     ≤ 8 card slots
-│       └── LaterRing             outer ring; ~0 offset (near wall)
-│           └── SlotContainer     unbounded (radial/scrolling layout)
-│
-├── TaskCardPrefab                instantiated per task (pooled)
-├── HUD                           "listening…", "thinking…", counts, error toasts
+├── BrainDumpd                    ASR capture + LLM commit            [BrainDumpController]
+│   └── RemoteServiceGatewayCredentials   RSG API token (must be present + filled)
+├── AnchorController             Custom Locations map/save/relocalize; publishes anchor state
+├── StickyWall                    board root, anchored to the wall     [StickyWallController]
+│   ├── WallBackdrop              editor stand-in for the real wall (a flat panel)
+│   ├── H_now / H_next / H_later  column headers ("NOW" / "NEXT" / "LATER")
+│   ├── NoteTemplate              disabled; cloned per task (group: "Quad" + "Label")
+│   ├── SweepButton               "Sweep wall" → clear board          [WallButton action=clear]
+│   ├── NewWallButton             "New wall"   → re-anchor             [WallButton action=reanchor]
+│   └── (note clones)             one per visible task, created at runtime
 └── Camera / SIK rig              (from Specs Base Template)
 ```
 
-**Cone geometry:** the target is wall-anchored, so the wall is behind the target and the
-apex points at the user. `NowRing` gets the largest forward (+Z, toward user) offset;
-`LaterRing` sits nearly flat on the wall. Suggested starting values (tune against FOV):
-Now +6 cm, Next +3 cm, Later 0 cm off the wall plane; ring radii ~8 / 18 / 30 cm; whole
-target placed ~150–200 cm from the user.
+**Board layout:** three vertical columns at fixed x (Now −42 / Next 0 / Later +42 cm); notes
+stack downward (~20 cm step). Each note is a small coloured box (~26×16 cm) with a Text3D
+label and a small random tilt (±4°) so it reads as hand-placed. Notes are cloned from
+`NoteTemplate` with `copyWholeHierarchy` at render time, coloured by ring (coral/yellow/blue),
+and titled from the task at runtime. Two teal wall buttons sit along the bottom. The board sits
+~100 cm from the user.
+
+**Cross-cutting singletons** (ES-module, not scene objects): **`TaskStoreProvider`** (the shared
+persistent `TaskStore`) and **`AnchorStateProvider`** (anchor state + a re-anchor command channel
+from the "New wall" button to `AnchorController`).
 
 ---
 
 ## 4. Script modules & responsibilities
 
-1. **AppController** — finite state machine and the only place transitions live:
-   `Idle → Anchoring → Ready → Listening → Transcribing → Parsing → Placing → Ready`,
-   with an `Error` branch off any state that returns to `Ready`. Wires events between
-   modules; owns nothing else.
-2. **VoiceCaptureController** — starts/stops listening, emits `onInterim(text)` and
-   `onFinal(text)`. Handles mic permission, end-of-utterance (silence) detection, and a
-   hard max-duration cap.
-3. **LLMService** — turns a final transcript into `Task[]`. Builds a strict prompt (schema +
-   few-shot), calls RSG, validates/repairs the returned JSON, enforces a max-tasks-per-
-   utterance cap, and surfaces timeout/quota/parse errors as typed failures.
-4. **RingCapacity** (`RingCapacity.ts`) — **pure** capacity engine (no engine deps, unit-tested):
-   `placeParsedBatch` (fresh-parse overflow), `promote` / `insertWithDisplacement` (displacement +
-   cascade), and helpers (`countOn`, `isFull`, `longestSittingOn`, `outwardRing`). Generic over any
-   `RingItem` so it preserves the caller's extra fields.
-5. **TaskStore** — single source of truth. Holds the active board + completed list; `add`/`addAll`,
-   `promote`, `complete`, `getByRing`, `clear`. **Delegates all capacity/placement to RingCapacity.**
-   **Persists** the full board (active + completed, incl. each task's `ring`, `enteredAt`, and
-   completion state) to an injectable `KeyValueStore` — the Lens `PersistentStorageSystem` by
-   default — auto-saving on every mutation and auto-loading on construction, so a fresh session
-   restores the previous board identically (verified by `PersistenceTests.ts`). No rendering logic.
-6. **RingLayoutController** — subscribes to `TaskStore` changes; positions cards into ring
-   slots, applies the cone Z-depths, and animates entries/exits and overflow/displacement.
-7. **AnchorController** — wall raycast against World Mesh, create/save/load the spatial
-   anchor, parent `TargetRoot`, and drive the re-place flow.
-8. **TaskCard** (on prefab) — renders text + urgency colour; pinch-to-complete; optional
-   grab-to-move between rings via SIK.
+1. **BrainDumpController** (`BrainDumpController.ts`) — voice front end. Pinch/tap toggles ASR
+   (`AsrModule`), accumulates the transcript, sends it to `LLMService`, and commits the resulting
+   tasks to the shared `TaskStore` (`makePlacedTask` → `addAll`). Editor-only `simulateDump` flag
+   injects a canned transcript through the real pipeline for mic-free testing.
+2. **LLMService** (`LLMService.ts`) — `TaskExtractor` interface + `OpenAITaskExtractor` (gpt-4o-mini
+   via RSG, Structured Outputs). The provider swap point; nothing else touches RSG.
+3. **TaskParsing** (`TaskParsing.ts`) — **pure** hardened parse: fence-stripping, strict
+   `parseModelResponse`, the local keyword **fallback parser**, and `extractTasksWithFallback`
+   (8 s timeout → fallback). Unit-tested (`BrainDumpTests.ts`, 15 cases).
+4. **RingCapacity** (`RingCapacity.ts`) — **pure** capacity engine (unit-tested): `placeParsedBatch`
+   (fresh-parse overflow), `promote` / `insertWithDisplacement` (displacement + cascade), helpers
+   (`countOn`, `isFull`, `longestSittingOn`, `outwardRing`). Generic over any `RingItem`. ("Ring"
+   here = the three tiers = the three columns.)
+5. **TaskStore** (`TaskStore.ts`) — single source of truth. Active board + completed list;
+   `add`/`addAll` (with **dedup**), `promote`, `complete`, `getByRing`, `clear`, `describe` (sorted
+   log dump), `onChange`. **Delegates all placement to RingCapacity.** **Persists** the full board
+   to an injectable `KeyValueStore` (Lens `PersistentStorageSystem` by default) on every mutation,
+   auto-loading on construction (verified by `PersistenceTests.ts`). Shared via `TaskStoreProvider`.
+6. **StickyWallController** (`StickyWallController.ts`) — presentation. Subscribes to `TaskStore`
+   and anchor-state changes; clones a note per task into its column, colours it, titles it, tilts
+   it, and slaps it on (staggered easeOutBack). Adds each note's grab/peel interactivity
+   (`Interactable` + `InteractableManipulation`): drop in a column → `promote`; drag off the
+   bottom → `complete`. Caps each column (Now 3 / Next 5 / Later 5) with a "+N more" token.
+7. **AnchorController** (`AnchorController.ts`) — Custom Locations map/save/relocalize; publishes
+   `located`/`searching`/`unlocated` via `AnchorStateProvider`; `reAnchor()`; device calls guarded
+   behind `isEditor()`. Editor keys C/A/R for testing.
+8. **WallButton** (`WallButton.ts`) — a pressable SIK button (runtime collider + `Interactable`);
+   `action: "clear" | "reanchor"`. Used for the Sweep-wall and New-wall buttons.
 
-Clean separation to protect: **capacity/placement logic lives only in `RingCapacity` (pure,
-unit-tested); `TaskStore` is a thin stateful wrapper over it; `RingLayoutController` is pure
-presentation.** The scene layer never re-implements placement rules.
+Clean separation to protect: **capacity/placement lives only in `RingCapacity` (pure,
+unit-tested); `TaskStore` is a thin stateful wrapper; `StickyWallController` is pure presentation.**
+The scene layer never re-implements placement rules.
 
 ---
 
@@ -178,37 +187,37 @@ Uses **`LocatedAtComponent`** (attaches `TargetRoot` to a real-world `LocationAs
 backed (network dependency, ties into F3); relocalization is **device-only** — it cannot be
 verified in the editor preview.
 
-### 5.2 Reload, relocalization & fly-in behavior (confirmed)
+### 5.2 Reload, relocalization & display behavior (confirmed)
 
-Placement (which ring each task belongs to) is always computed by `RingCapacity`. What differs by
+Placement (which column a task belongs to) is always computed by `RingCapacity`. What differs by
 branch is *display*:
 
-- **Same room** (`onFound`): rings appear on the anchored wall; every card spawns floating in
-  front of the user and **flies (staggered) to its ring slot** (Now→centre, Next→middle, Later→outer).
-- **New/different room** (anchor retrieved but never `onFound`): the wall rings are not shown.
-  - **Now cards float in front of the user** — a portable stack (≤3) that travels with them.
-  - **Next/Later cards are hidden** — they exist only on the rings in the anchored room.
-  - A **fresh brain dump in a new room**: new **Now** cards stay (join the floating stack); new
-    **Next/Later** cards **fly off and disappear** (they belong to the wall in the old room).
-- **Re-anchor:** a button beside the target re-attaches the rings to a new wall (mints a fresh
-  `LocationAsset`, stores it, saves the new id). After re-anchoring, all cards display on the new wall.
+- **Same room** (`onFound`): the three columns show on the anchored wall; notes **slap on**
+  (staggered scale-in with a small overshoot) as they render.
+- **New/different room** (anchor retrieved but never `onFound`): the Next/Later columns + their
+  headers are hidden; only the **Now** notes (≤3) show as a portable set in front of the user.
+  Next/Later tasks still exist in the store — they reappear once the board is (re-)anchored.
+- **Re-anchor** ("New wall" button): maps the current space, stores a fresh `LocationAsset`, saves
+  the new id, and the full board re-displays on the new wall.
 
-**Animation:** cards always originate in front of the user; staggered timing; easing at
-implementer's discretion. Owned by `RingLayoutController` (pure presentation).
+**Animation:** notes scale in from near-zero with an easeOutBack overshoot, staggered. Owned by
+`StickyWallController` (pure presentation).
 
 ### 5.3 Implementation status
 
-- **`AnchorController`** — built. On device: loads a saved `persistedLocationId`, `retrieveLocation`
-  → `LocatedAtComponent`; `onFound` → `located`, an 8s timeout → `unlocated`. `reAnchor()` maps the
-  space (`createMappingSession`→`checkpoint`)→`storeLocation`→saves id→`located`. All device calls are
-  guarded behind `isEditor()`. Publishes state via **`AnchorStateProvider`** (singleton).
-- **`RingLayoutController`** — branches on anchor state: `located`/`searching` show rings + all cards;
-  `unlocated` hides the ring meshes + Next/Later and floats the Now stack in front. Verified in the
-  editor by simulating state.
-- **Clear board** + **re-anchor** — actions wired; **editor keys C / A / R** (clear / toggle state /
-  re-anchor) drive them for testing, and `CLEAR` / `RE-ANCHOR` button labels sit beside the target.
-- **DEVICE-ONLY, not yet verified:** the actual mapping, relocalization, and cloud store/retrieve;
-  and on-device **pinch interaction** for the buttons (SIK `Interactable`) — currently editor-key only.
+- **`AnchorController`** — built. Loads a saved `persistedLocationId` → `retrieveLocation` →
+  `LocatedAtComponent`; `onFound` → `located`, an 8 s timeout → `unlocated`. `reAnchor()` maps the
+  space (`createMappingSession` → `checkpoint`) → `storeLocation` → saves id → `located`. Device calls
+  guarded behind `isEditor()`. State + re-anchor command via **`AnchorStateProvider`**.
+- **`StickyWallController`** — built; branches on anchor state (located/searching = all columns;
+  unlocated = Now-only). Data-driven from `TaskStore`, with grab/peel interactivity per note.
+  Editor-verified: rendering, live updates, columns/colours, entrance, and no-error init of the
+  interactivity.
+- **Sweep-wall / New-wall buttons** (`WallButton`) — built; init-verified. Editor keys C / R are
+  fallbacks for clear / re-anchor.
+- **DEVICE-ONLY, not yet verified:** mapping / relocalization / cloud store; button **pinch**; and
+  note **drag/peel** — all require hand tracking or real space (the preview-interactor package isn't
+  installed).
 
 ---
 
@@ -233,8 +242,11 @@ delegates to. **Two distinct mechanisms** apply depending on how a task arrives:
 - "Longest-sitting" is defined by `enteredAt` — a monotonic stamp set when a task enters its
   current ring; a displaced task gets a fresh stamp, becoming the newest occupant where it lands.
 
-Overflow/displacement must be *visible*: briefly flash the task in its intended ring, then animate
-the movement, so the user understands why "urgent" landed in Later (or why a Now card slid out).
+**Display caps (Sticky Wall):** distinct from the capacity rules above, each **column** shows at
+most a few notes (Now 3 / Next 5 / Later 5); extra tasks collapse into a **"+N more"** token at the
+bottom of the column so the wall stays legible. Overflow/displacement is conveyed by notes
+re-rendering into their actual column; a dedicated "flash in intended column, then slide out" cue
+is future polish, not yet built.
 
 **Freeing slots on completion:** completing a Now/Next task removes it and frees a slot, but does
 **not** auto-promote (locked: manual). Promotion is the explicit user action that triggers
@@ -244,7 +256,9 @@ mechanism B above.
 - Empty utterance / LLM returns zero tasks → no-op with a gentle "nothing to add" toast.
 - One utterance yields more tasks than total remaining capacity → excess flows to Later
   (which is unbounded), so nothing is dropped.
-- Duplicate/near-duplicate text → allowed by default (dedup is a stretch; risky to over-merge).
+- Duplicate titles → **deduped** (`TaskStore.addAll` skips a task whose normalized title already
+  exists on the active board; completed tasks can recur). LLM rephrasings still slip through —
+  semantic dedup is a future enhancement.
 
 ---
 
@@ -256,7 +270,7 @@ mechanism B above.
 | F2 | **LLM failure** | Timeout, RSG quota exhausted, malformed/hallucinated JSON, over/under-splitting | **Structured Outputs (`strict` json_schema) makes schema-valid JSON the guaranteed common case.** Hardened path (`TaskParsing.ts`): 8s timeout cap + a **local keyword fallback parser** that runs on any failure (reject/timeout/empty/truncated/fenced-broken/wrong-shape) — splits the transcript on sentence/conjunction boundaries and assigns urgency by keyword, so a task list is always produced. Markdown fences are stripped; validation drops bad entries. Covered by an 8-case suite (`BrainDumpTests.ts`). |
 | F3 | **Anchoring failure** | No wall hit, poor lighting, sparse features, wall too far, drift | Guided placement + distance/normal checks; re-place flow; data decoupled from anchor. |
 | F4 | **Persistence failure** | Schema change between builds, corrupt JSON, anchor lost across rooms | `schemaVersion` + defensive parse; data survives anchor loss; never throw on load. |
-| F5 | **Capacity confusion** | Task lands in an outer ring unexpectedly | Overflow flash-then-cascade animation; ring labels + live counts. |
+| F5 | **Capacity confusion** | Task lands in an outer column unexpectedly | Column headers + live counts; overflow "+N more" token; (flash-then-slide cue is future polish). |
 | F6 | **Performance / thermal** | Continuous ASR + world mesh + many text meshes + animations | Cap task count; pool cards; disable world mesh after anchor is set; throttle updates; no per-frame allocation. |
 | F7 | **Latency UX** | speak→ASR→LLM→place is several seconds | Staged feedback (listening → thinking → placing); never a silent gap. |
 | F8 | **FOV / legibility** | Narrow SPECS FOV; small/distant text | Size target to FOV; readable font sizes; comfortable placement distance; keep Now inside central view. |
@@ -277,19 +291,22 @@ Ranked, with the reasoning that they are *both* central to the concept *and* SPE
    loudest. Interim-transcript feedback + re-record is the safety net.
 4. **Performance / thermal budget** — continuous perception + world-space text + animation on
    a thermally constrained device. Cap counts and shut down world mesh after anchoring.
-5. **FOV / ergonomics** — narrow FOV means the three-ring target and its text must be
-   deliberately sized and placed, not assumed.
+5. **FOV / ergonomics** — narrow FOV means the board and its note text must be deliberately
+   sized and placed, not assumed.
 
-Comparatively low risk: SIK interactions, key-value persistence of task data, and rendering
-the ring meshes.
+Comparatively low risk: key-value persistence of task data and rendering the sticky notes.
+(SIK interactions moved *up* in risk once we committed to per-note drag/peel — device-only.)
 
 ---
 
-## 9. Recommended de-risking / build order (for when we build)
+## 9. Build order (largely executed)
 
-1. **Skeleton with fake data** — scene hierarchy, three rings at cone depths, `TaskStore` +
-   `RingLayoutController` driven by hardcoded tasks. Proves layout, capacity, overflow
-   animation with zero external dependencies.
+> Steps 1–5 below are essentially done. The layer order held up; the presentation module was
+> rebuilt twice (rings → mobile → Sticky Wall) without touching the data/logic layers, which
+> validates the separation. Remaining work is the on-device pass (§5.3) and polish.
+
+1. **Skeleton with fake data** — scene hierarchy + presentation driven by hardcoded tasks,
+   proving layout/capacity/entrance with zero external dependencies. *(Done — now the Sticky Wall.)*
 2. **RSG spike (isolated)** — one script: hardcoded transcript string → RSG → validated
    `Task[]` printed to log. Proves the riskiest dependency before it's entangled in the app.
 3. **Anchor spike (isolated)** — place + save + relocalize a single cube on a wall across a
@@ -304,6 +321,10 @@ Each spike is throwaway and independent, so a failure in one doesn't block the o
 
 ## 10. Decisions to lock before building
 
+- **Presentation: LOCKED → Sticky Wall** (pivoted 2026-08-14 from the three-ring "cone"; a
+  Calder-mobile variant was also prototyped and dropped). Colour-coded sticky notes in Now/Next/Later
+  columns on a wall-anchored board; slap-on entrance; drag-to-column re-prioritize; drag-off-to-complete.
+  Reason: legibility (rings couldn't fit 8 Next cards) and a grounded, tactile feel.
 - **Capacity policy: LOCKED → hybrid (revised 2026-08-13; supersedes the earlier "Option A only").**
   Two mechanisms (implemented + unit-tested in `RingCapacity.ts`, see §6):
   **(A) Fresh parse → overflow, no displacement** — tasks fill their urgency ring in LLM order and
@@ -331,9 +352,10 @@ Each spike is throwaway and independent, so a failure in one doesn't block the o
   snappier end-of-speech). **Reason for change:** VoiceML's transcription API is deprecated in
   Lens Studio 5.23 ("will stop functioning in an upcoming version"); `AsrModule` is the
   supported forward path and is what SpectaclesUIKit's `VoiceInputProvider` uses internally.
-- **Placement trigger: LOCKED → pinch-to-place.** User faces a wall and pinches (SIK) to
-  confirm placement; the raycast/normal checks in §5 gate a valid wall before the anchor is
-  minted. Gives the user control over exactly where the target lands.
-- **Confirm-before-commit: LOCKED → immediate commit** for demo snappiness — parsed tasks fly
-  straight to the rings. A confirm-before-commit **toggle** is built in as an off-by-default
-  option (useful for noisy-venue safety / F1 + F2), but the default path is immediate.
+- **Placement / re-anchor: LOCKED → "New wall" button → mapping session.** Pressing New wall maps
+  the current space (`createMappingSession` → `checkpoint`) and stores the `LocationAsset`; there is no
+  separate raycast-and-pinch placement step — the board anchors wherever you map it. Editor key R is
+  the dev fallback.
+- **Confirm-before-commit: LOCKED → immediate commit** for demo snappiness — parsed tasks slap
+  straight onto the wall. (A confirm-before-commit toggle remains a possible off-by-default option
+  for noisy-venue safety / F1 + F2; not currently built.)

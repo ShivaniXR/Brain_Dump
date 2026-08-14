@@ -1,19 +1,22 @@
 /**
  * Brain Dumpd — shared anchor-state singleton.
  *
- * AnchorController writes the current spatial state; RingLayoutController subscribes and
- * branches its display:
- *   - "searching"  — trying to relocalize a saved location (treat like located for display)
- *   - "located"    — same room: rings shown on the wall, all cards fly to slots
- *   - "unlocated"  — new/different room: rings hidden, only Now cards float in front
+ * AnchorController writes the state; StickyWallController and BrainDumpController read it:
+ *   - "placing"  — the board is a placeholder following the user's gaze; awaiting a tap/pinch
+ *                  to lock it to a wall. Only the backdrop shows; taps go to placement, not voice.
+ *   - "located"  — the board is fixed on a wall; full columns + buttons show; taps drive voice.
  */
-export type AnchorState = "searching" | "located" | "unlocated";
+export type AnchorState = "placing" | "located";
 
-let _state: AnchorState = "searching";
+let _state: AnchorState = "placing";
 const _listeners: ((s: AnchorState) => void)[] = [];
 
 export function getAnchorState(): AnchorState {
   return _state;
+}
+
+export function isPlacing(): boolean {
+  return _state === "placing";
 }
 
 export function setAnchorState(next: AnchorState): void {
@@ -26,7 +29,7 @@ export function onAnchorStateChange(cb: (s: AnchorState) => void): void {
   _listeners.push(cb);
 }
 
-// --- re-anchor command channel (button -> AnchorController) ---
+// --- re-anchor command channel ("New wall" button -> AnchorController) ---
 const _reAnchorListeners: (() => void)[] = [];
 
 export function onReAnchorRequest(cb: () => void): void {

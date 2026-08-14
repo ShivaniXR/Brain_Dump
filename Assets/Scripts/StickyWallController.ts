@@ -30,11 +30,28 @@ export class StickyWallController extends BaseScriptComponent {
   @input popDuration: number = 0.32;
   @input stagger: number = 0.09;
 
-  private readonly colX: { [k: string]: number } = { now: -42, next: 0, later: 42 };
+  @input
+  @allowUndefined
+  @hint("Crumpled paper-ball prefab spawned when a note is thrown or dragged off to delete it.")
+  paperBall: ObjectPrefab;
+
+  @input
+  @hint("Release speed (cm/s) above which a drag counts as a throw-to-delete.")
+  throwSpeed: number = 45;
+
+  @input
+  @hint("How far below the board (cm) the invisible floor sits — where crumpled balls land and rest.")
+  floorDropCm: number = 150;
+
+  @input
+  @hint("World size (cm) of the crumpled paper ball.")
+  ballScaleCm: number = 11;
+
+  private readonly colX: { [k: string]: number } = { now: -50, next: 0, later: 50 };
   private readonly colCap: { [k: string]: number } = { now: 3, next: 5, later: 5 };
-  private readonly topY = 24;
-  private readonly stepY = 20;
-  private readonly peelY = -55; // dragged below this = peeled off = complete
+  private readonly topY = 28;
+  private readonly stepY = 25;
+  private readonly peelY = -60; // dragged below this = peeled off = crumple + delete
 
   private store: TaskStore;
   private clones: SceneObject[] = [];
@@ -42,6 +59,18 @@ export class StickyWallController extends BaseScriptComponent {
   private elapsed = 0;
   private startScale = new vec3(0.02, 0.02, 0.02);
   private fullScale = new vec3(1, 1, 1);
+
+  // --- trash / crumple physics state ---
+  private trashRoot: SceneObject | null = null;
+  private floor: SceneObject | null = null;
+  private falling: { obj: SceneObject; body: BodyComponent; life: number; frozen: boolean }[] = [];
+  private readonly ballLife = 2.6; // seconds a crumpled ball lives before it fades out
+  private readonly shrinkWindow = 0.5; // last seconds spent shrinking to nothing
+
+  // Release-velocity tracking for the currently grabbed note (world cm/s).
+  private grabNote: SceneObject | null = null;
+  private grabPrevWorld = vec3.zero();
+  private grabVel = vec3.zero();
 
   onAwake(): void {
     this.createEvent("OnStartEvent").bind(() => this.setup());
@@ -72,7 +101,7 @@ export class StickyWallController extends BaseScriptComponent {
     }
   }
 
-  private setHeaderVisible(name: string, visible: boolean): void {
+  private setChildVisible(name: string, visible: boolean): void {
     const root = this.getSceneObject();
     for (let i = 0; i < root.getChildrenCount(); i++) {
       if (root.getChild(i).name === name) root.getChild(i).enabled = visible;
@@ -89,11 +118,18 @@ export class StickyWallController extends BaseScriptComponent {
       return;
     }
 
-    const located = getAnchorState() !== "unlocated";
-    this.setHeaderVisible("H_next", located);
-    this.setHeaderVisible("H_later", located);
+    const located = getAnchorState() === "located";
+    // Backdrop always shows — it's the placeholder while placing and the board panel once located.
+    this.setChildVisible("WallBackdrop", true);
+    const chrome = ["H_now", "H_next", "H_later", "SweepButton", "NewWallButton"];
+    for (let i = 0; i < chrome.length; i++) this.setChildVisible(chrome[i], located);
 
-    const rings: Ring[] = located ? ["now", "next", "later"] : ["now"];
+    if (!located) {
+      print("[StickyWall] placing — placeholder follows your gaze; tap to place.");
+      return; // no notes/headers/buttons while placing
+    }
+
+    const rings: Ring[] = ["now", "next", "later"];
     let order = 0;
     for (let r = 0; r < rings.length; r++) {
       const ring = rings[r];
@@ -147,22 +183,38 @@ export class StickyWallController extends BaseScriptComponent {
   private addInteractivity(note: SceneObject, taskId: string): void {
     const collider = note.createComponent("Physics.ColliderComponent") as ColliderComponent;
     const box = Shape.createBoxShape();
-    box.size = new vec3(26, 16, 2);
+    box.size = new vec3(36, 21, 2);
     collider.shape = box;
 
     note.createComponent(Interactable.getTypeName());
     const manip = note.createComponent(InteractableManipulation.getTypeName()) as InteractableManipulation;
+    manip.onTranslationStart.add(() => this.onNoteGrabbed(note));
     manip.onTranslationEnd.add(() => this.onNoteReleased(note, taskId));
   }
 
+  private onNoteGrabbed(note: SceneObject): void {
+    this.grabNote = note;
+    this.grabPrevWorld = note.getTransform().getWorldPosition();
+    this.grabVel = vec3.zero();
+  }
+
   private onNoteReleased(note: SceneObject, taskId: string): void {
+    const wasTracked = this.grabNote === note;
+    const releaseVel = this.grabVel;
+    const speed = releaseVel.length;
+    this.grabNote = null;
+
     const pos = note.getTransform().getLocalPosition();
-    if (pos.y < this.peelY) {
-      print("[StickyWall] peel -> complete " + taskId);
-      this.store.complete(taskId); // re-render snaps the wall back
+    const thrown = wasTracked && speed > this.throwSpeed;
+    const draggedOff = pos.y < this.peelY;
+
+    if (thrown || draggedOff) {
+      // Crumple into a paper ball, drop it, and delete the task.
+      this.trashNote(note, taskId, thrown ? releaseVel : null);
       return;
     }
-    // Snap to the nearest column and re-prioritize to that ring.
+
+    // Otherwise: snap to the nearest column and re-prioritize to that ring.
     const cols: Ring[] = ["now", "next", "later"];
     let best: Ring = "now";
     let bestDist = 1e9;
@@ -177,6 +229,80 @@ export class StickyWallController extends BaseScriptComponent {
     this.store.promote(taskId, best);
   }
 
+  /**
+   * Turn a note into a physics-simulated crumpled paper ball at its current world pose,
+   * launch it (flung with the release velocity, or a soft downward toss for a drag-off),
+   * then remove the task from the board. The ball self-destructs after it lands and fades.
+   */
+  private trashNote(note: SceneObject, taskId: string, throwVel: vec3 | null): void {
+    if (!this.paperBall) {
+      print("[StickyWall] paperBall prefab not wired — completing without crumple.");
+      this.store.complete(taskId);
+      return;
+    }
+
+    const nt = note.getTransform();
+    const worldPos = nt.getWorldPosition();
+    const worldRot = nt.getWorldRotation();
+
+    this.ensureTrashInfra(worldPos);
+
+    const ball = this.paperBall.instantiate(this.trashRoot);
+    ball.name = "CrumpledNote";
+    const bt = ball.getTransform();
+    bt.setWorldPosition(worldPos);
+    bt.setWorldRotation(worldRot);
+    bt.setWorldScale(new vec3(this.ballScaleCm, this.ballScaleCm, this.ballScaleCm));
+
+    const body = ball.createComponent("Physics.BodyComponent") as BodyComponent;
+    body.dynamic = true;
+    body.shape = Shape.createSphereShape();
+    body.mass = 0.02; // light paper
+    body.damping = 0.05;
+    body.angularDamping = 0.1;
+
+    // Launch: honor the throw, or give a drag-off a gentle downward/outward toss.
+    let v: vec3;
+    if (throwVel) {
+      v = throwVel;
+      const sp = v.length;
+      const maxSp = 250; // clamp so a hard fling doesn't rocket out of the room
+      if (sp > maxSp) v = v.uniformScale(maxSp / sp);
+    } else {
+      v = new vec3((Math.random() - 0.5) * 30, -40, -30);
+    }
+    body.velocity = v;
+    body.angularVelocity = new vec3(
+      (Math.random() - 0.5) * 12,
+      (Math.random() - 0.5) * 12,
+      (Math.random() - 0.5) * 12
+    ); // tumble
+
+    this.falling.push({ obj: ball, body: body, life: 0, frozen: false });
+    print("[StickyWall] crumpled + tossed note -> delete " + taskId);
+
+    // Free the slot immediately; the ball lives on independently under the trash root.
+    this.store.complete(taskId);
+  }
+
+  /** Lazily create the world-space trash root and an invisible floor under the board. */
+  private ensureTrashInfra(nearWorld: vec3): void {
+    if (!this.trashRoot) {
+      this.trashRoot = global.scene.createSceneObject("BrainDumpd_TrashRoot");
+    }
+    if (!this.floor) {
+      this.floor = global.scene.createSceneObject("BrainDumpd_Floor");
+      const col = this.floor.createComponent("Physics.ColliderComponent") as ColliderComponent;
+      const box = Shape.createBoxShape();
+      box.size = new vec3(600, 10, 600); // wide, thin slab
+      col.shape = box;
+    }
+    // Keep the floor beneath the board and horizontal in world space.
+    const ft = this.floor.getTransform();
+    ft.setWorldPosition(new vec3(nearWorld.x, nearWorld.y - this.floorDropCm, nearWorld.z));
+    ft.setWorldRotation(quat.quatIdentity());
+  }
+
   private matFor(ring: Ring): Material {
     if (ring === "now") return this.matNow;
     if (ring === "next") return this.matNext;
@@ -184,7 +310,8 @@ export class StickyWallController extends BaseScriptComponent {
   }
 
   private animate(): void {
-    this.elapsed += getDeltaTime();
+    const dt = getDeltaTime();
+    this.elapsed += dt;
     for (let i = 0; i < this.anims.length; i++) {
       const a = this.anims[i];
       let t = (this.elapsed - a.delay) / this.popDuration;
@@ -192,6 +319,40 @@ export class StickyWallController extends BaseScriptComponent {
       if (t > 1) t = 1;
       const eased = this.easeOutBack(t);
       a.obj.getTransform().setLocalScale(vec3.lerp(this.startScale, this.fullScale, eased));
+    }
+    this.trackGrabVelocity(dt);
+    this.updateFalling(dt);
+  }
+
+  /** Sample the grabbed note's world position to estimate a release velocity (cm/s). */
+  private trackGrabVelocity(dt: number): void {
+    if (!this.grabNote || dt <= 0) return;
+    const now = this.grabNote.getTransform().getWorldPosition();
+    const inst = now.sub(this.grabPrevWorld).uniformScale(1 / dt);
+    this.grabVel = vec3.lerp(this.grabVel, inst, 0.5); // smooth out jitter
+    this.grabPrevWorld = now;
+  }
+
+  /** Advance crumpled balls: let physics run, then freeze + shrink out and destroy. */
+  private updateFalling(dt: number): void {
+    for (let i = this.falling.length - 1; i >= 0; i--) {
+      const f = this.falling[i];
+      f.life += dt;
+
+      if (!f.frozen && f.life >= this.ballLife - this.shrinkWindow) {
+        f.body.dynamic = false; // stop the sim before the shrink-out so scale doesn't fight it
+        f.frozen = true;
+      }
+      if (f.frozen) {
+        let k = (this.ballLife - f.life) / this.shrinkWindow;
+        if (k < 0) k = 0;
+        const s = this.ballScaleCm * k;
+        f.obj.getTransform().setWorldScale(new vec3(s, s, s));
+      }
+      if (f.life >= this.ballLife) {
+        f.obj.destroy();
+        this.falling.splice(i, 1);
+      }
     }
   }
 
