@@ -80,7 +80,7 @@ export class StickyWallController extends BaseScriptComponent {
 
   // --- fly-in: fresh notes travel from the mic HUD to their slot on the board ---
   private seenIds: { [id: string]: boolean } = {};
-  private flyingIn: { obj: SceneObject; t: number; from: vec3; to: vec3 }[] = [];
+  private flyingIn: { obj: SceneObject; target: SceneObject; t: number; from: vec3; to: vec3 }[] = [];
   private readonly holdDuration = 0.7; // note pops in and hovers in front of you first
   private readonly flyDuration = 1.5; // then a slower flight to the wall
 
@@ -139,6 +139,8 @@ export class StickyWallController extends BaseScriptComponent {
   private render(): void {
     for (let i = 0; i < this.clones.length; i++) this.clones[i].destroy();
     this.clones = [];
+    for (let i = 0; i < this.flyingIn.length; i++) this.flyingIn[i].obj.destroy(); // cancel in-flight
+    this.flyingIn = [];
     this.anims = [];
     this.reminders = []; // rebuilt below; firedReminders persists so a chime fires once
     this.pulses = [];
@@ -221,19 +223,20 @@ export class StickyWallController extends BaseScriptComponent {
     tr.setLocalRotation(quat.angleAxis((tilt * Math.PI) / 180, vec3.forward()));
     tr.setLocalScale(this.startScale);
 
-    this.anims.push({ obj: note, delay: order * this.stagger });
-    if (taskId) this.addInteractivity(note, taskId);
-    this.clones.push(note);
-
     // A freshly-dumped task flies in from the mic HUD to this slot — but only when the mic is
     // roaming with you (away from the wall). At the wall the note just appears in place.
-    if (fresh && this.micHud && isMicFollowing()) {
-      this.spawnFlyIn(ring, note.getTransform().getWorldPosition(), title);
+    const fly = fresh && this.micHud != null && isMicFollowing();
+    if (!fly) {
+      this.anims.push({ obj: note, delay: order * this.stagger }); // normal pop-in
     }
+    // When flying, the note stays at startScale (invisible) until the fly-in lands and reveals it.
+    if (taskId) this.addInteractivity(note, taskId);
+    this.clones.push(note);
+    if (fly) this.spawnFlyIn(ring, note, note.getTransform().getWorldPosition(), title);
   }
 
-  /** Spawn a colored note copy at the mic HUD that flies to `toWorld`, then vanishes. */
-  private spawnFlyIn(ring: Ring, toWorld: vec3, title: string): void {
+  /** Spawn a colored note copy at the mic HUD that flies to `toWorld`, then reveals the real note. */
+  private spawnFlyIn(ring: Ring, target: SceneObject, toWorld: vec3, title: string): void {
     const fly = this.getSceneObject().copyWholeHierarchy(this.template);
     fly.enabled = true;
     fly.name = "FlyIn";
@@ -255,7 +258,7 @@ export class StickyWallController extends BaseScriptComponent {
     const ft = fly.getTransform();
     ft.setWorldPosition(from);
     ft.setWorldScale(new vec3(0.01, 0.01, 0.01));
-    this.flyingIn.push({ obj: fly, t: 0, from: from, to: toWorld });
+    this.flyingIn.push({ obj: fly, target: target, t: 0, from: from, to: toWorld });
     print("[StickyWall] note flying in from HUD: " + title);
   }
 
@@ -283,6 +286,8 @@ export class StickyWallController extends BaseScriptComponent {
       let k = (f.t - this.holdDuration) / this.flyDuration;
       if (k >= 1) {
         f.obj.destroy();
+        // Landed — reveal the real note in its slot with a pop.
+        if (f.target) this.anims.push({ obj: f.target, delay: this.elapsed });
         this.flyingIn.splice(i, 1);
         continue;
       }
