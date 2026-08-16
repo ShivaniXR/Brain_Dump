@@ -19,7 +19,7 @@
 import { TaskExtractor, OpenAITaskExtractor } from "./LLMService";
 import { Task, makePlacedTask } from "./TaskTypes";
 import { getTaskStore } from "./TaskStoreProvider";
-import { isPlacing } from "./AnchorStateProvider";
+import { isPlacing, getAnchorState } from "./AnchorStateProvider";
 import { setCaptureState, onRecordToggleRequest } from "./CaptureStateProvider";
 
 // Brief pauses are normal in a brain dump, so tolerate a long silence before the
@@ -32,10 +32,9 @@ export class BrainDumpController extends BaseScriptComponent {
   private extractor: TaskExtractor = new OpenAITaskExtractor();
 
   private asr = require("LensStudio:AsrModule") as AsrModule;
-  private gestureModule = require("LensStudio:GestureModule") as GestureModule;
 
   @input
-  @hint("Editor only: tap injects a canned brain dump through the full pipeline (no mic needed). Off = tap does real voice capture.")
+  @hint("Editor-only dev tool: when on, a tap runs a canned brain dump through the full pipeline (no mic needed). Never toggles the live mic — that's the mic button's job.")
   editorSimulateDump: boolean = false;
 
   private options: AsrModule.AsrTranscriptionOptions;
@@ -57,10 +56,10 @@ export class BrainDumpController extends BaseScriptComponent {
     this.setupAsrOptions();
     this.bindTrigger();
     onRecordToggleRequest(() => {
-      if (isPlacing()) return; // place the wall first; mic is live once located
+      if (getAnchorState() !== "located") return; // finish onboarding + place the wall first
       this.toggle();
     }); // mic button
-    print("[BrainDumpd] Ready. Pinch (or tap in editor) to start/stop a brain dump.");
+    print("[BrainDumpd] Ready. Tap/pinch the mic button to start/stop a brain dump.");
   }
 
   private setupAsrOptions(): void {
@@ -88,23 +87,16 @@ export class BrainDumpController extends BaseScriptComponent {
   }
 
   private bindTrigger(): void {
-    if (global.deviceInfoSystem.isEditor()) {
-      // No hand tracking in the editor. Tap either simulates a full dump (default,
-      // for testing the pipeline without a mic) or toggles ASR like on device.
+    // Recording is toggled ONLY by the mic button (its Interactable -> requestRecordToggle,
+    // handled in onAwake). A pinch/tap anywhere else must not start or stop recording.
+    //
+    // The editor has no hand tracking and SIK button clicks can be awkward in preview, so
+    // when editorSimulateDump is enabled a tap runs a canned dump to exercise the pipeline.
+    // This is a dev-only affordance (off by default) and never toggles the live mic.
+    if (global.deviceInfoSystem.isEditor() && this.editorSimulateDump) {
       this.createEvent("TapEvent").bind(() => {
         if (isPlacing()) return; // while placing, taps confirm placement (AnchorController)
-        if (this.editorSimulateDump) {
-          this.simulateDump();
-        } else {
-          this.toggle();
-        }
-      });
-    } else {
-      // Right-hand pinch. Numeric literal cast: the runtime enum isn't exposed as a value.
-      const rightHand = 1 as unknown as GestureModule.HandType;
-      this.gestureModule.getPinchDownEvent(rightHand).add(() => {
-        if (isPlacing()) return;
-        this.toggle();
+        this.simulateDump();
       });
     }
   }

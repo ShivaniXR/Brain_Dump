@@ -1,0 +1,76 @@
+- !<AssetImportMetadata/a69851a8-98d5-4e8b-98bc-342c142d8704>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 9d3ad38b-9559-4074-95b1-99f5d69ac031
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 9d3ad38b-9559-4074-95b1-99f5d69ac031
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> d4d4b938-4595-4aaf-a11d-8863baa9a3ce
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/d4d4b938-4595-4aaf-a11d-8863baa9a3ce>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 8b47fdb2-d467-4e75-a5a0-0fe520b27a4c
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    camera: false
+    dockEnter: false
+    dockExit: false
+    downOffset: false
+    followScale: false
+    forwardDistance: false
+    halo: false
+    micButton: false
+    micDock: false
+    smoothing: false
+    spinner: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - camera: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      micButton: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      halo: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      spinner: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      micDock: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      forwardDistance: !<float> 52.000000
+      downOffset: !<float> 30.000000
+      smoothing: 0.200000
+      dockEnter: !<float> 300.000000
+      dockExit: !<float> 420.000000
+      followScale: 0.700000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject camera
+    - // @input SceneObject micButton
+    - // @input SceneObject halo
+    - // @input SceneObject spinner
+    - "// @input SceneObject micDock {\"hint\":\"Marker on the board where the mic docks when you're in the same room as the wall.\"}"
+    - '// @input float forwardDistance = 70 {"hint":"Distance in front of the camera when following (cm)."}'
+    - '// @input float downOffset = 22 {"hint":"How far below eye level to sit the HUD (cm)."}'
+    - '// @input float smoothing = 0.16 {"hint":"Follow smoothing per frame (0..1; higher = snappier)."}'
+    - '// @input float dockEnter = 300 {"hint":"Dock to the wall when the camera is within this of it (cm)."}'
+    - '// @input float dockExit = 420 {"hint":"Undock (follow you) once the camera is beyond this (cm)."}'
+    - '// @input float followScale = 0.55 {"hint":"Scale of the mic while following you (1 = wall size; 0.55 = ~45% smaller)."}'

@@ -33,8 +33,10 @@
     matLater: false
     matNext: false
     matNow: false
+    micHud: false
     paperBall: false
     popDuration: false
+    reminderSound: false
     stagger: false
     template: false
     throwSpeed: false
@@ -57,6 +59,8 @@
       throwSpeed: !<float> 45.000000
       floorDropCm: !<float> 150.000000
       ballScaleCm: !<float> 11.000000
+      reminderSound: !<reference.AudioTrackAsset> 00000000-0000-0000-0000-000000000000
+      micHud: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -71,3 +75,5 @@
     - '// @input float throwSpeed = 45 {"hint":"Release speed (cm/s) above which a drag counts as a throw-to-delete."}'
     - '// @input float floorDropCm = 150 {"hint":"How far below the board (cm) the invisible floor sits — where crumpled balls land and rest."}'
     - '// @input float ballScaleCm = 11 {"hint":"World size (cm) of the crumpled paper ball."}'
+    - '// @input Asset.AudioTrackAsset reminderSound {"hint":"Optional chime played when a timed task comes due (in-session reminder)."}'
+    - '// @input SceneObject micHud {"hint":"The roaming mic HUD — new notes fly from here to the board when dumped away from the wall."}'

@@ -16,6 +16,12 @@ export interface Task {
   title: string; // imperative, max 6 words
   urgency: Urgency;
   category: Category;
+  time?: string; // optional "HH:MM" (24h) if the person mentioned a specific time
+}
+
+/** True if `v` is a valid "HH:MM" 24-hour time string. */
+export function isTimeString(v: unknown): v is string {
+  return typeof v === "string" && /^([01]?\d|2[0-3]):[0-5]\d$/.test(v);
 }
 
 /** A ring on the target. Same value set as Urgency, but a distinct concept:
@@ -59,6 +65,7 @@ export function restorePlacedTask(raw: unknown): PlacedTask | null {
     createdAt: typeof o.createdAt === "number" ? o.createdAt : Date.now(),
   };
   if (typeof o.completedAt === "number") result.completedAt = o.completedAt;
+  if (isTimeString(o.time)) result.time = o.time;
   return result;
 }
 
@@ -67,7 +74,7 @@ let _idCounter = 0;
 /** Wrap an LLM Task into a PlacedTask (ring is assigned later by the store). */
 export function makePlacedTask(task: Task): PlacedTask {
   _idCounter += 1;
-  return {
+  const placed: PlacedTask = {
     title: task.title,
     urgency: task.urgency,
     category: task.category,
@@ -77,6 +84,8 @@ export function makePlacedTask(task: Task): PlacedTask {
     enteredAt: 0, // provisional; RingCapacity stamps this on placement
     createdAt: Date.now(),
   };
+  if (task.time) placed.time = task.time;
+  return placed;
 }
 
 export function isUrgency(v: unknown): v is Urgency {
@@ -104,7 +113,9 @@ export function toTask(raw: unknown): Task | null {
   if (!title) return null;
   if (!isUrgency(o.urgency)) return null;
   if (!isCategory(o.category)) return null;
-  return { title, urgency: o.urgency, category: o.category };
+  const task: Task = { title, urgency: o.urgency, category: o.category };
+  if (isTimeString(o.time)) task.time = o.time;
+  return task;
 }
 
 // JSON parsing of model responses lives in TaskParsing.ts (parseModelResponse),

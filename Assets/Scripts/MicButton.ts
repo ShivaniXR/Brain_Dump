@@ -19,7 +19,7 @@ export class MicButton extends BaseScriptComponent {
 
     const collider = so.createComponent("Physics.ColliderComponent") as ColliderComponent;
     const box = Shape.createBoxShape();
-    box.size = new vec3(18, 18, 3);
+    box.size = new vec3(24, 24, 4); // matches the circular mic button
     collider.shape = box;
 
     const interactable = so.createComponent(Interactable.getTypeName()) as Interactable;

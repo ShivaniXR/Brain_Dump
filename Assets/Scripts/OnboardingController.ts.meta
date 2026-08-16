@@ -1,0 +1,55 @@
+- !<AssetImportMetadata/a6cd82c8-e5ea-45d6-8da1-6d3176232c0d>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 3742f2f1-3292-4033-a608-3e4c0e9ffc88
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 3742f2f1-3292-4033-a608-3e4c0e9ffc88
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 36024c23-3bbf-4116-9255-1d41bb5f7c60
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/36024c23-3bbf-4116-9255-1d41bb5f7c60>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: e16c3c38-7de1-4483-a871-73a9aeb64757
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    camera: false
+    downOffset: false
+    forwardDistance: false
+    panel: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - camera: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      panel: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      forwardDistance: !<float> 95.000000
+      downOffset: !<float> 4.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject camera
+    - '// @input SceneObject panel {"hint":"The welcome panel visuals to show while onboarding."}'
+    - '// @input float forwardDistance = 95 {"hint":"Distance in front of the camera (cm)."}'
+    - '// @input float downOffset = 4 {"hint":"How far below eye level (cm)."}'

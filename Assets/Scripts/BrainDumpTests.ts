@@ -5,7 +5,13 @@
  * Uses injected fake LLM calls (no network) so every branch is deterministic.
  * Verify results with RunAndCollectLogsTool and grep for "[TEST]".
  */
-import { extractTasksWithFallback, fallbackUrgency, LLMCall } from "./TaskParsing";
+import {
+  extractTasksWithFallback,
+  fallbackParse,
+  fallbackUrgency,
+  normalizeTranscript,
+  LLMCall,
+} from "./TaskParsing";
 import { Task } from "./TaskTypes";
 
 // Deterministic transcript used for every fallback case. Splits on "and also"/"and"
@@ -123,6 +129,27 @@ export class BrainDumpTests extends BaseScriptComponent {
       'false positive guard: "know" is not now',
       fallbackUrgency("I know I should call the dentist") === "next",
       "got " + fallbackUrgency("I know I should call the dentist")
+    );
+
+    // 10. "later" detection (the reported bug: nothing ever landed in later).
+    this.check('word "later" -> later', fallbackUrgency("Fix the fence later") === "later");
+    this.check('phrase "no rush" -> later', fallbackUrgency("Repaint the door, no rush") === "later");
+    this.check(
+      'negation "not urgent" -> later (not swallowed by "urgent")',
+      fallbackUrgency("This is not urgent") === "later",
+      "got " + fallbackUrgency("This is not urgent")
+    );
+
+    // 11. ASR time artifact: "10;30" must not split one task into two.
+    this.check(
+      'normalize "10;30" -> "10:30"',
+      normalizeTranscript("meet at 10;30 today") === "meet at 10:30 today"
+    );
+    const meeting = fallbackParse("I have a meeting with John tonight at 10;30");
+    this.check(
+      "spoken time stays one task",
+      meeting.length === 1 && meeting[0].urgency === "now",
+      "n=" + meeting.length + " urg=[" + meeting.map((t) => t.urgency).join(",") + "]"
     );
 
     print("[TEST] ===== SUMMARY: " + this.passed + " passed, " + this.failed + " failed =====");

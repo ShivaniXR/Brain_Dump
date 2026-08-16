@@ -16,6 +16,7 @@
 import { TaskStore } from "./TaskStore";
 import { getTaskStore } from "./TaskStoreProvider";
 import { getAnchorState, onAnchorStateChange } from "./AnchorStateProvider";
+import { isMicFollowing } from "./MicHudStateProvider";
 import { Ring } from "./TaskTypes";
 import { Interactable } from "SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable";
 import { InteractableManipulation } from "SpectaclesInteractionKit.lspkg/Components/Interaction/InteractableManipulation/InteractableManipulation";
@@ -47,10 +48,20 @@ export class StickyWallController extends BaseScriptComponent {
   @hint("World size (cm) of the crumpled paper ball.")
   ballScaleCm: number = 11;
 
-  private readonly colX: { [k: string]: number } = { now: -50, next: 0, later: 50 };
-  private readonly colCap: { [k: string]: number } = { now: 3, next: 5, later: 5 };
-  private readonly topY = 28;
-  private readonly stepY = 25;
+  @input
+  @allowUndefined
+  @hint("Optional chime played when a timed task comes due (in-session reminder).")
+  reminderSound: AudioTrackAsset;
+
+  @input
+  @allowUndefined
+  @hint("The roaming mic HUD — new notes fly from here to the board when dumped away from the wall.")
+  micHud: SceneObject;
+
+  private readonly colX: { [k: string]: number } = { now: -42, next: 0, later: 42 };
+  private readonly colCap: { [k: string]: number } = { now: 5, next: 5, later: 5 };
+  private readonly topY = 18; // first row sits clear of the header underline
+  private readonly stepY = 22;
   private readonly peelY = -60; // dragged below this = peeled off = crumple + delete
 
   private store: TaskStore;
@@ -59,6 +70,19 @@ export class StickyWallController extends BaseScriptComponent {
   private elapsed = 0;
   private startScale = new vec3(0.02, 0.02, 0.02);
   private fullScale = new vec3(1, 1, 1);
+
+  // --- in-session reminders (fire only while the Lens is open) ---
+  private audio: AudioComponent | null = null;
+  private reminders: { note: SceneObject; id: string; time: string }[] = [];
+  private firedReminders: { [key: string]: boolean } = {}; // key = id@HH:MM, survives re-renders
+  private pulses: { note: SceneObject; t: number }[] = []; // active reminder alarms
+  private readonly alarmDuration = 8; // how long a due reminder rings + bounces (seconds)
+
+  // --- fly-in: fresh notes travel from the mic HUD to their slot on the board ---
+  private seenIds: { [id: string]: boolean } = {};
+  private flyingIn: { obj: SceneObject; t: number; from: vec3; to: vec3 }[] = [];
+  private readonly holdDuration = 0.7; // note pops in and hovers in front of you first
+  private readonly flyDuration = 1.5; // then a slower flight to the wall
 
   // --- trash / crumple physics state ---
   private trashRoot: SceneObject | null = null;
@@ -79,6 +103,10 @@ export class StickyWallController extends BaseScriptComponent {
 
   private setup(): void {
     if (this.template) this.template.enabled = false;
+    if (this.reminderSound) {
+      this.audio = this.getSceneObject().createComponent("Component.AudioComponent") as AudioComponent;
+      this.audio.audioTrack = this.reminderSound;
+    }
     this.setHeaderText();
     this.store = getTaskStore();
     this.store.onChange(() => this.render());
@@ -112,15 +140,21 @@ export class StickyWallController extends BaseScriptComponent {
     for (let i = 0; i < this.clones.length; i++) this.clones[i].destroy();
     this.clones = [];
     this.anims = [];
+    this.reminders = []; // rebuilt below; firedReminders persists so a chime fires once
+    this.pulses = [];
     this.elapsed = 0;
     if (!this.template) {
       print("[StickyWall] no template assigned.");
       return;
     }
 
-    const located = getAnchorState() === "located";
-    // Backdrop always shows — it's the placeholder while placing and the board panel once located.
-    this.setChildVisible("WallBackdrop", true);
+    const state = getAnchorState();
+    const located = state === "located";
+    // The post-it placeholder + its hint only show while placing / re-anchoring — hidden once
+    // the wall is locked, and during onboarding (only the welcome note shows then).
+    const placing = state === "placing";
+    this.setChildVisible("WallBackdrop", placing);
+    this.setChildVisible("PlaceHint", placing);
     const chrome = ["H_now", "H_next", "H_later", "SweepButton", "NewWallButton"];
     for (let i = 0; i < chrome.length; i++) this.setChildVisible(chrome[i], located);
 
@@ -137,21 +171,33 @@ export class StickyWallController extends BaseScriptComponent {
       const cap = this.colCap[ring];
       const shown = tasks.length < cap ? tasks.length : cap;
       for (let i = 0; i < shown; i++) {
-        this.makeNote(ring, tasks[i].title, i, order, tasks[i].id);
+        const t = tasks[i];
+        const fresh = !this.seenIds[t.id] && Date.now() - t.createdAt < 4000;
+        this.makeNote(ring, t.title, i, order, t.id, t.time || "", fresh);
+        this.seenIds[t.id] = true;
         order += 1;
       }
       if (tasks.length > cap) {
-        this.makeNote(ring, "+" + (tasks.length - cap) + " more", cap, order, null);
+        this.makeNote(ring, "+" + (tasks.length - cap) + " more", cap, order, null, "", false);
         order += 1;
       }
     }
     print("[StickyWall] rendered " + this.clones.length + " notes [" + getAnchorState() + "]");
   }
 
-  private makeNote(ring: Ring, title: string, slot: number, order: number, taskId: string | null): void {
+  private makeNote(
+    ring: Ring,
+    title: string,
+    slot: number,
+    order: number,
+    taskId: string | null,
+    time: string,
+    fresh: boolean
+  ): void {
     const note = this.getSceneObject().copyWholeHierarchy(this.template);
     note.enabled = true;
 
+    const display = time ? title + "\n" + time : title; // show the time on the note
     for (let i = 0; i < note.getChildrenCount(); i++) {
       const ch = note.getChild(i);
       if (ch.name.indexOf("Quad") === 0) {
@@ -161,10 +207,11 @@ export class StickyWallController extends BaseScriptComponent {
         const t = ch.getComponent("Component.Text3D") as Text3D;
         if (t) {
           t.text = "";
-          t.text = title;
+          t.text = display;
         }
       }
     }
+    if (taskId && time) this.reminders.push({ note, id: taskId, time });
 
     const x = this.colX[ring];
     const y = this.topY - slot * this.stepY;
@@ -177,6 +224,72 @@ export class StickyWallController extends BaseScriptComponent {
     this.anims.push({ obj: note, delay: order * this.stagger });
     if (taskId) this.addInteractivity(note, taskId);
     this.clones.push(note);
+
+    // A freshly-dumped task flies in from the mic HUD to this slot — but only when the mic is
+    // roaming with you (away from the wall). At the wall the note just appears in place.
+    if (fresh && this.micHud && isMicFollowing()) {
+      this.spawnFlyIn(ring, note.getTransform().getWorldPosition(), title);
+    }
+  }
+
+  /** Spawn a colored note copy at the mic HUD that flies to `toWorld`, then vanishes. */
+  private spawnFlyIn(ring: Ring, toWorld: vec3, title: string): void {
+    const fly = this.getSceneObject().copyWholeHierarchy(this.template);
+    fly.enabled = true;
+    fly.name = "FlyIn";
+    for (let i = 0; i < fly.getChildrenCount(); i++) {
+      const ch = fly.getChild(i);
+      if (ch.name.indexOf("Quad") === 0) {
+        const rmv = ch.getComponent("Component.RenderMeshVisual") as RenderMeshVisual;
+        if (rmv) rmv.mainMaterial = this.matFor(ring);
+      } else if (ch.name.indexOf("Label") === 0) {
+        const t = ch.getComponent("Component.Text3D") as Text3D;
+        if (t) {
+          t.text = "";
+          t.text = title;
+        }
+      }
+    }
+    // Spawn a little above the mic so the note is readable in front of you before it flies.
+    const from = this.micHud.getTransform().getWorldPosition().add(new vec3(0, 14, 0));
+    const ft = fly.getTransform();
+    ft.setWorldPosition(from);
+    ft.setWorldScale(new vec3(0.01, 0.01, 0.01));
+    this.flyingIn.push({ obj: fly, t: 0, from: from, to: toWorld });
+    print("[StickyWall] note flying in from HUD: " + title);
+  }
+
+  /**
+   * Two-phase fly-in: (1) the note pops in and hovers in front of you for holdDuration,
+   * then (2) it eases over to its slot on the board and vanishes.
+   */
+  private updateFlyIn(dt: number): void {
+    for (let i = this.flyingIn.length - 1; i >= 0; i--) {
+      const f = this.flyingIn[i];
+      f.t += dt;
+      const ft = f.obj.getTransform();
+
+      if (f.t < this.holdDuration) {
+        // Phase 1: pop in and hover in front of the user.
+        let k = f.t / 0.3;
+        if (k > 1) k = 1;
+        const s = this.easeOutBack(k);
+        ft.setWorldPosition(f.from);
+        ft.setWorldScale(new vec3(s, s, s));
+        continue;
+      }
+
+      // Phase 2: glide to the board (perspective shrinks it as it recedes).
+      let k = (f.t - this.holdDuration) / this.flyDuration;
+      if (k >= 1) {
+        f.obj.destroy();
+        this.flyingIn.splice(i, 1);
+        continue;
+      }
+      const eased = k * k * (3 - 2 * k); // smoothstep
+      ft.setWorldPosition(vec3.lerp(f.from, f.to, eased));
+      ft.setWorldScale(new vec3(1, 1, 1));
+    }
   }
 
   /** Make a note draggable: drop it in a column to re-prioritize, drag off the bottom to complete. */
@@ -244,6 +357,7 @@ export class StickyWallController extends BaseScriptComponent {
     const nt = note.getTransform();
     const worldPos = nt.getWorldPosition();
     const worldRot = nt.getWorldRotation();
+    const ringColor = this.ringColorOf(note); // read before the note is destroyed
 
     this.ensureTrashInfra(worldPos);
 
@@ -253,6 +367,7 @@ export class StickyWallController extends BaseScriptComponent {
     bt.setWorldPosition(worldPos);
     bt.setWorldRotation(worldRot);
     bt.setWorldScale(new vec3(this.ballScaleCm, this.ballScaleCm, this.ballScaleCm));
+    this.tintBall(ball, ringColor); // crumpled wad matches the note's colour
 
     const body = ball.createComponent("Physics.BodyComponent") as BodyComponent;
     body.dynamic = true;
@@ -283,6 +398,42 @@ export class StickyWallController extends BaseScriptComponent {
 
     // Free the slot immediately; the ball lives on independently under the trash root.
     this.store.complete(taskId);
+  }
+
+  /** The note's ring colour, read from its "Quad" backing material. */
+  private ringColorOf(note: SceneObject): vec4 {
+    for (let i = 0; i < note.getChildrenCount(); i++) {
+      const ch = note.getChild(i);
+      if (ch.name.indexOf("Quad") === 0) {
+        const rmv = ch.getComponent("Component.RenderMeshVisual") as RenderMeshVisual;
+        if (rmv && rmv.mainMaterial) return rmv.mainMaterial.mainPass.baseColor;
+      }
+    }
+    return new vec4(1, 1, 1, 1);
+  }
+
+  /** Tint a crumpled ball to a colour, cloning its material so concurrent balls stay independent. */
+  private tintBall(ball: SceneObject, color: vec4): void {
+    const rmv = this.findRenderMesh(ball);
+    if (!rmv || !rmv.mainMaterial) return;
+    const mat = rmv.mainMaterial.clone();
+    // The paper prefab is a GLTF PBR material: colour is baseColorFactor, and its
+    // metallicFactor defaults to 1 (which renders flat grey). Tint + de-metal it.
+    const pass = mat.mainPass as any;
+    pass.baseColorFactor = new vec4(color.x, color.y, color.z, 1);
+    pass.metallicFactor = 0;
+    rmv.mainMaterial = mat;
+  }
+
+  /** First RenderMeshVisual found anywhere in a hierarchy (the ball prefab may nest its mesh). */
+  private findRenderMesh(obj: SceneObject): RenderMeshVisual | null {
+    const r = obj.getComponent("Component.RenderMeshVisual") as RenderMeshVisual;
+    if (r) return r;
+    for (let i = 0; i < obj.getChildrenCount(); i++) {
+      const found = this.findRenderMesh(obj.getChild(i));
+      if (found) return found;
+    }
+    return null;
   }
 
   /** Lazily create the world-space trash root and an invisible floor under the board. */
@@ -322,6 +473,54 @@ export class StickyWallController extends BaseScriptComponent {
     }
     this.trackGrabVelocity(dt);
     this.updateFalling(dt);
+    this.checkReminders();
+    this.updatePulses(dt);
+    this.updateFlyIn(dt);
+  }
+
+  /** Fire a one-time chime + bounce when a timed task reaches its clock time (Lens open only). */
+  private checkReminders(): void {
+    if (this.reminders.length === 0) return;
+    const now = new Date();
+    const curMin = now.getHours() * 60 + now.getMinutes();
+    for (let i = 0; i < this.reminders.length; i++) {
+      const r = this.reminders[i];
+      const key = r.id + "@" + r.time;
+      if (this.firedReminders[key]) continue;
+      const parts = r.time.split(":");
+      const dueMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      const delta = curMin - dueMin;
+      // Fire when the due minute arrives (with a 5-min grace so a slightly late glance
+      // still pings), but never for times that were already long past on load.
+      if (delta >= 0 && delta <= 5) {
+        this.firedReminders[key] = true;
+        this.pulses.push({ note: r.note, t: 0 });
+        // Loop the chime for the whole alarm; updatePulses stops it when the bounce ends.
+        if (this.audio) this.audio.play(-1);
+        print("[StickyWall] reminder due (" + r.time + ") for " + r.id);
+      }
+    }
+  }
+
+  /** Advance active reminder alarms; runs after the pop loop so it wins on the pulsing note. */
+  private updatePulses(dt: number): void {
+    for (let i = this.pulses.length - 1; i >= 0; i--) {
+      const p = this.pulses[i];
+      p.t += dt;
+      // A sustained attention bounce for the whole alarm window, easing off in the last second.
+      let fade = 1;
+      if (p.t > this.alarmDuration - 1) fade = Math.max(0, this.alarmDuration - p.t);
+      const amp = 0.22 * Math.sin(p.t * 8) * fade;
+      const s = 1 + amp;
+      p.note
+        .getTransform()
+        .setLocalScale(new vec3(this.fullScale.x * s, this.fullScale.y * s, this.fullScale.z));
+      if (p.t >= this.alarmDuration) {
+        p.note.getTransform().setLocalScale(this.fullScale);
+        this.pulses.splice(i, 1);
+        if (this.audio && this.pulses.length === 0) this.audio.stop(true); // last alarm done (fade out)
+      }
+    }
   }
 
   /** Sample the grabbed note's world position to estimate a release velocity (cm/s). */

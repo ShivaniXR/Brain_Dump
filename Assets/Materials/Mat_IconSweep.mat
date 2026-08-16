@@ -1,9 +1,12 @@
-- !<Material/fc69ebc1-1092-4e0f-afec-619b47d0564d>
+- !<Material/61082cc0-07fe-4070-aba3-11c48737aa73>
   PackagePath: ""
   PassesInfo:
-    - !<own> 0d4dda37-48d7-4cf6-9ce8-904cdbb91c2c
-- !<PassInfo/0d4dda37-48d7-4cf6-9ce8-904cdbb91c2c>
+    - !<own> a0d6bf18-aadc-4c21-b433-f151f0960c3a
+- !<PassInfo/a0d6bf18-aadc-4c21-b433-f151f0960c3a>
   CachedProperties:
+    - Port_Default_N369:
+        typeIdx: 5
+        value: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
     - Port_Depth_N004:
         typeIdx: 1
         value: 1.000000
@@ -76,18 +79,28 @@
     - NODE_27_DROPLIST_ITEM 0
     - NODE_49_DROPLIST_ITEM 0
     - NODE_69_DROPLIST_ITEM 0
+    - ENABLE_BASE_TEX
   BlendMode: Normal
   Properties:
     Port_Default_N204:
       typeIdx: 1
       value: 1.000000
-    Port_Default_N369:
-      typeIdx: 5
-      value: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
     PreviewEnabled:
       typeIdx: 0
       value: 0
     baseColor:
       typeIdx: 5
-      value: {x: 1.000000, y: 0.350000, z: 0.320000, w: 1.000000}
-  Pass: !<reference> c0dbd2ef-530c-468b-911d-cd1238d09ce0
+      value: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+    baseTex:
+      typeIdx: 9
+      value:
+        id: 827f2019-9955-4a9a-9cb3-f6c0e90b7cdc
+        sampler:
+          filteringMode: Trilinear
+          wrapModeU: Repeat
+          wrapModeV: Repeat
+          wrapModeW: Repeat
+          borderColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+          mipmaps: false
+        type: Texture2D
+  Pass: !<reference> 93783b3e-ae87-40b7-b9ee-db07787d1059

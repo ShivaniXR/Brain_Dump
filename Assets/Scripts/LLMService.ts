@@ -24,9 +24,19 @@ const SYSTEM_PROMPT =
   "You convert a person's spoken stream-of-consciousness brain dump into a concise task list. " +
   "Extract each DISTINCT actionable task the person mentions. For each task:\n" +
   "- title: an imperative phrase, MAXIMUM 6 words, no filler words.\n" +
-  "- urgency: 'now' (urgent / must do today / they sound stressed about it), " +
-  "'next' (soon, this week), or 'later' (someday / low priority).\n" +
+  "- urgency: 'now' (urgent / must do today or tonight / they sound stressed about it), " +
+  "'next' (soon, this week), or 'later' (someday, no rush, low priority, not time-sensitive, " +
+  "next month or beyond). Actively use 'later' for anything the person frames as low priority.\n" +
   "- category: 'work', 'home', or 'errand'.\n" +
+  "- time: if the person mentions a specific clock time for the task (e.g. 'at 10:30', " +
+  "'tonight at 8', 'noon'), set it as 24-hour 'HH:MM' (e.g. '22:30', '20:00', '12:00'); " +
+  "otherwise use an empty string.\n" +
+  "Keep ALL details of a single event or task together as ONE task. Do NOT split a task into " +
+  "several just because it mentions a time, a person, or a place. For example " +
+  "'meeting with John tonight at 10:30' is ONE task ('Meet John tonight', now), not two. " +
+  "Treat a time written with odd punctuation (e.g. 10;30) as a single time.\n" +
+  "Examples: 'call the dentist today' -> now; 'finish the report this week' -> next; " +
+  "'read that book someday, no rush' -> later.\n" +
   "If the text contains no actionable tasks, return an empty tasks array. " +
   "Do not invent tasks that were not mentioned.";
 
@@ -42,8 +52,13 @@ const TASK_LIST_SCHEMA: Record<string, unknown> = {
           title: { type: "string", description: "Imperative phrase, max 6 words" },
           urgency: { type: "string", enum: ["now", "next", "later"] },
           category: { type: "string", enum: ["work", "home", "errand"] },
+          time: {
+            type: "string",
+            description:
+              "24-hour 'HH:MM' if a specific clock time was mentioned for this task, else empty string",
+          },
         },
-        required: ["title", "urgency", "category"],
+        required: ["title", "urgency", "category", "time"],
         additionalProperties: false,
       },
     },

@@ -66,7 +66,9 @@ export class AnchorController extends BaseScriptComponent {
       setAnchorState("located");
       this.tryRelocalize(); // device: refine to the exact wall if possible
     } else {
-      this.startPlacing();
+      // First run: show the onboarding panel; it calls requestReAnchor() to start placing.
+      setAnchorState("onboarding");
+      print("[Anchor] ONBOARDING — showing welcome; tap to start placing.");
     }
   }
 

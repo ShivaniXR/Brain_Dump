@@ -1,31 +1,42 @@
 /**
  * Brain Dumpd — IndicatorController.
  *
- * Drives one indicator disc on the wall based on capture state:
- *   - listening: coral, pulses with input volume (real mic level if a mic audio track is
- *                wired; otherwise a lively fallback pulse).
- *   - thinking:  a compact blue pulse in the same place while the LLM runs.
- *   - idle:      hidden.
+ * Drives two affordances that animate around the mic button, based on capture state:
+ *   - listening: a soft coral halo (behind the mic) that breathes with input volume
+ *                (real mic level if a mic audio track is wired; otherwise a lively fallback).
+ *   - thinking:  a blue spinner ring that rotates while the LLM works.
+ *   - idle:      both hidden.
  *
- * Attach near the mic button. Inputs: indicator (the disc), and optionally micAudioTrack
- * (a Microphone audio track asset) for true volume-reactivity.
+ * Attach to the halo SceneObject (RenderMeshVisual). Inputs: indicator (the halo disc),
+ * spinner (the loading ring), and optionally micAudioTrack for true volume-reactivity.
  */
-import { getCaptureState, onCaptureStateChange, setVolume } from "./CaptureStateProvider";
+import {
+  getCaptureState,
+  onCaptureStateChange,
+  setVolume,
+} from "./CaptureStateProvider";
 
 @component
 export class IndicatorController extends BaseScriptComponent {
-  @input indicator: SceneObject;
+  @input indicator: SceneObject; // coral listening halo (behind the mic)
+
+  @input
+  @allowUndefined
+  @hint("Blue loading spinner shown while the LLM is thinking; rotated each frame.")
+  spinner: SceneObject;
 
   @input
   @allowUndefined
   @hint("Optional Microphone audio track — wire it for true volume-reactive pulsing.")
   micAudioTrack: AudioTrackAsset;
 
+  @input @hint("Spinner rotation speed (radians/sec).") spinnerSpeed: number = 5;
+
   private micProvider: MicrophoneAudioProvider | null = null;
   private rmv: RenderMeshVisual | null = null;
   private baseScale: vec3 = new vec3(1, 1, 1);
   private vol = 0;
-  private t = 0;
+  private angle = 0;
 
   onAwake(): void {
     if (this.micAudioTrack) {
@@ -39,29 +50,43 @@ export class IndicatorController extends BaseScriptComponent {
     if (this.indicator) {
       this.baseScale = this.indicator.getTransform().getLocalScale();
       this.rmv = this.indicator.getComponent("Component.RenderMeshVisual") as RenderMeshVisual;
-      this.indicator.enabled = false;
+      // NOTE: this script lives on the halo object, so we must keep the SceneObject enabled
+      // (disabling it would stop UpdateEvent -> the spinner would never rotate). Toggle the
+      // mesh visual instead to show/hide the halo.
+      if (this.rmv) this.rmv.enabled = false;
     }
-    onCaptureStateChange((s) => {
-      if (this.indicator) this.indicator.enabled = s !== "idle";
-    });
+    if (this.spinner) this.spinner.enabled = false;
+
+    onCaptureStateChange((s) => this.applyState(s));
+    this.applyState(getCaptureState());
+  }
+
+  /** Show exactly one affordance for the current state (or none when idle). */
+  private applyState(s: string): void {
+    if (this.rmv) this.rmv.enabled = s === "listening"; // halo mesh (object stays enabled)
+    if (this.spinner) this.spinner.enabled = s === "thinking";
+    if (s === "listening") this.vol = 0;
+    if (s === "thinking") this.angle = 0;
   }
 
   private step(): void {
-    if (!this.indicator || !this.indicator.enabled) return;
-    this.t += getDeltaTime();
     const state = getCaptureState();
 
-    if (state === "listening") {
-      const amp = this.micProvider ? this.micLevel() : 0.35 + 0.35 * Math.abs(Math.sin(this.t * 7));
+    if (state === "listening" && this.indicator) {
+      const amp = this.micProvider ? this.micLevel() : 0.35 + 0.35 * Math.abs(Math.sin(this.getT() * 7));
       this.vol += (amp - this.vol) * 0.25; // smooth
       setVolume(this.vol);
-      this.applyScale(1 + this.vol * 0.9);
-      this.applyColor(1, 0.35, 0.32, 1); // coral
-    } else if (state === "thinking") {
-      const pulse = 0.55 + 0.08 * Math.sin(this.t * 7); // compact + gentle
-      this.applyScale(pulse);
-      this.applyColor(0.35, 0.55, 1, 1); // blue
+      this.applyScale(1 + this.vol * 1.1); // breathe: quiet ~ hugs the mic, loud ~ big halo
+      this.applyColor(1, 0.45, 0.4, 0.4 + this.vol * 0.45); // coral, more opaque when louder
+    } else if (state === "thinking" && this.spinner) {
+      this.angle += getDeltaTime() * this.spinnerSpeed;
+      this.spinner.getTransform().setLocalRotation(quat.angleAxis(-this.angle, vec3.forward()));
     }
+  }
+
+  /** Monotonic time for the fallback pulse (avoids a separate accumulator). */
+  private getT(): number {
+    return getTime();
   }
 
   /** RMS of the current mic frame, mapped to ~0..1. */

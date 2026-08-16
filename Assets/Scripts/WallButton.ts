@@ -43,7 +43,7 @@ export class WallButton extends BaseScriptComponent {
 
     const collider = so.createComponent("Physics.ColliderComponent") as ColliderComponent;
     const box = Shape.createBoxShape();
-    box.size = new vec3(34, 14, 3);
+    box.size = new vec3(40, 13, 4); // matches the rounded pill
     collider.shape = box;
 
     const interactable = so.createComponent(Interactable.getTypeName()) as Interactable;

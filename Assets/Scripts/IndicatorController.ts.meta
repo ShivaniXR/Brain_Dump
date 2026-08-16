@@ -30,6 +30,8 @@
   ScriptInputsHidden:
     indicator: false
     micAudioTrack: false
+    spinner: false
+    spinnerSpeed: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -40,10 +42,14 @@
     []
   DefaultScriptInputs:
     - indicator: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      spinner: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       micAudioTrack: !<reference.AudioTrackAsset> 00000000-0000-0000-0000-000000000000
+      spinnerSpeed: !<float> 5.000000
   ScriptTypes:
     -
       {}
   InputLines:
     - // @input SceneObject indicator
+    - '// @input SceneObject spinner {"hint":"Blue loading spinner shown while the LLM is thinking; rotated each frame."}'
     - '// @input Asset.AudioTrackAsset micAudioTrack {"hint":"Optional Microphone audio track — wire it for true volume-reactive pulsing."}'
+    - '// @input float spinnerSpeed = 5 {"hint":"Spinner rotation speed (radians/sec)."}'
