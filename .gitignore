@@ -1,3 +1,12 @@
+# Project docs kept local only (not published to GitHub)
+AGENTS.md
+CLAUDE.md
+CLAD_PROMPT_LOG.md
+CLAD_PROMPT_LOG.pdf
+PROJECT_DESCRIPTION.md
+PROJECT_DESCRIPTION.pdf
+docs/
+
 # Shipped by Lens Studio
 
 # The lines below are automatically generated and updated by Lens Studio.
